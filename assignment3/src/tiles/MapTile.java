@@ -9,7 +9,7 @@ public class MapTile {
 	
 	public static final String tileNameSpace = "tiles.";
 	
-	public enum Type {WALL, UTILITY, TRAP, EMPTY, ROAD, START, FINISH};
+	public enum Type {WALL, TRAP, EMPTY, ROAD, START, FINISH};
 
 	protected Type tileType;
 	

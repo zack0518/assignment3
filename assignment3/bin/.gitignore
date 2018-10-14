@@ -1,0 +1,17 @@
+/.project
+/Driving.Properties
+/bin/
+/controller/
+/easy-map.tmx
+/exceptions/
+/lecture-preview.tmx
+/log/
+/log4j2.xml
+/mycontroller/
+/sprites/
+/swen30006/
+/test-key-map.tmx
+/tiles/
+/tilesets/
+/utilities/
+/world/
