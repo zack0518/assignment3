@@ -36,7 +36,9 @@ public class MyAIController extends CarController {
 		public void update() {
 			//Gets what the car can see
 			HashMap<Coordinate, MapTile> currentView = getView();
-			
+			for (Coordinate c : currentView.keySet()) {
+				System.out.println(c);
+			}
 			HashMap<Coordinate, MapTile> currentMap = getMap();
 			for (Coordinate c : currentMap.keySet()) {
 				if (currentMap.get(c).getType() == MapTile.Type.ROAD) {
