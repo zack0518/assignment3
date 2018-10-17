@@ -208,7 +208,6 @@ public class GoalMaker {
 	}
 	
 	public Coordinate getCurrGoal() {
-		System.out.println(futureGoal.get(0));
 		if(car.getKeys().size() == car.numKeys) {
 			return exit;
 		}

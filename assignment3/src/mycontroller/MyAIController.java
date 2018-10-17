@@ -33,6 +33,8 @@ public class MyAIController extends CarController {
 
 	// Car Speed to move at
 	private final int CAR_MAX_SPEED = 5;
+	
+	private static boolean stop = false;
 
 	private HashSet<Coordinate> lava = new HashSet<Coordinate>();
 	private HashSet<Coordinate> grass = new HashSet<Coordinate>();
@@ -67,11 +69,15 @@ public class MyAIController extends CarController {
 		for(Coordinate c: currentView.keySet()) {
 			if (currentView.get(c).isType(Type.TRAP)) {
 				currentMap.put(c, currentView.get(c));
+				TrapTile trapTile = (TrapTile) currentView.get(c);
+				if (trapTile.getTrap().equals("health")) {
+					health.add(c);
+				}
 			}
 
 		}
 		
-		boolean stop = false;
+
 
 		Coordinate currentPosition = new Coordinate(getPosition());
 		currGoal.evaluateCurrentView(currentView);
@@ -80,9 +86,6 @@ public class MyAIController extends CarController {
 		if (currPos.equals(currDistination)) {
 			currGoal.reachedTheGoal(currPos);
 			currDistination = currGoal.getCurrGoal();
-//			applyBrake();
-//			stop = true;
-
 		}
 		if (checkShouldBrake(currentView, new Coordinate(getPosition()))) {
 			applyBrake();
@@ -93,9 +96,9 @@ public class MyAIController extends CarController {
 		}
 		// checkStateChange();
 		if (getSpeed() < CAR_MAX_SPEED && stop == false) { // Need speed to turn and progress toward the exit
-			applyForwardAcceleration(); // Tough luck if there's a wall in the way
+			applyForwardAcceleration();// Tough luck if there's a wall in the way
 		}
-		move(currentPosition, currDistination, mapTest);
+		move(currentPosition, currDistination, mapTest);		
 
 	}
 
@@ -113,8 +116,10 @@ public class MyAIController extends CarController {
 		// TODO Auto-generated method stub
 		HashMap<Coordinate, MapTile> currentView = getView();
 		List<Coordinate> path = new ArrayList<>();
-		if (getHealth() <= 100 && !health.isEmpty()) {
+		boolean increaseHealth = false;
+		if (getHealth() < 50 && !health.isEmpty()) {
 			Coordinate nearestHealth = getShortPath(currentPosition, health);
+			increaseHealth = true;
 			path = PathFinding.aStarFindPath(currentPosition, nearestHealth, currentMap, currentView);
 		} else {
 			path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap, currentView);
@@ -123,6 +128,7 @@ public class MyAIController extends CarController {
 		/**
 		 * Cancel the goal if there is mud on goal
 		 */
+
 		for (Coordinate c : path) {
 			if (currentView.get(c)!=null) {
 				if(currentView.get(c).getType() == MapTile.Type.TRAP) {
@@ -134,33 +140,30 @@ public class MyAIController extends CarController {
 			}
 		}
 		
-		if (path.size() >= 2) {
+		if (path.size() >= 2 ) {
 			Coordinate nextPoisition = path.get(1);
-			moveToGoal(currentPosition, nextPoisition, getOrientation());
-			TrapTile tile;
-			if (currentView.get(nextPoisition).isType(MapTile.Type.TRAP)) {
-				tile = (TrapTile) currentView.get(nextPoisition);
-				if (tile.getTrap().equals("mud")) {
-					applyBrake();
-				} else {
-					moveToGoal(currentPosition, nextPoisition, getOrientation());
-				}
-				
+			if (needHealth(currentPosition, health)) {
+				applyBrake();
 			}
-			
-			
-//			TrapTile tile = (TrapTile) currentView.get(nextPoisition);
-//			if (tile.equals("mud")) {
-//				applyReverseAcceleration();
-//			}
-//			else {
-//				moveToGoal(currentPosition, nextPoisition, getOrientation());
-//			}
-//			moveToGoal(currentPosition, nextPoisition, getOrientation());
-//			changeDirection(currentPosition, currDistination, getOrientation());
-		} else {
-			System.out.println("no path find");
+			else {
+				moveToGoal(currentPosition, nextPoisition, getOrientation());	
+			}
+		
+			} 
+		
+	}
+
+	private boolean needHealth(Coordinate currentPosition, HashSet<Coordinate> health) {
+		// TODO Auto-generated method stub
+		for(Coordinate c: health) {
+			if (currentPosition.equals(c)) {
+				getHealth();
+				if (getHealth()<100) {
+					return true;
+				}
+			}
 		}
+		return false;
 	}
 
 	private Coordinate getShortPath(Coordinate currentPosition, HashSet<Coordinate> health) {
