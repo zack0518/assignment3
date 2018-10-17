@@ -111,9 +111,6 @@ public class MyAIController extends CarController {
 			applyForwardAcceleration();// Tough luck if there's a wall in the way
 		}
 		move(currentPosition, currDistination, mapTest);	
-		System.out.println(hasAllKeys());
-
-
 	}
 
 	private boolean checkShouldBrake(HashMap<Coordinate, MapTile> currentView, Coordinate pos) {

@@ -30,9 +30,8 @@ public class GoalMaker {
 	public boolean shouldBrake;
 	public Coordinate exit;
 	public Coordinate starPos;
+	public List <Coordinate> visitedPoint;
 	public List <KeyAndLocation> keyAndLocaitons;
-	
-//	public static boolean hasAllKeys;
 	
 	
 	GoalMaker (int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> currentMap, Car car){
@@ -45,62 +44,52 @@ public class GoalMaker {
 		this.car = car;
 		shouldBrake = false;
 		this.keyAndLocaitons = new ArrayList <KeyAndLocation>();
+		this.visitedPoint = new ArrayList <Coordinate>();
 		predefinedGoals();
 	}
 
 	public void predefinedGoals() {
 		starPos = new Coordinate(this.car.getPosition());
-		Coordinate corner1 = new Coordinate(0,0);
-		if(!isValidGoal(corner1)) {
-			corner1 = getClosestValidCoordinate(corner1);
-		}
-		Coordinate corner2 = new Coordinate(mapWidth - 5, 0);
-		Coordinate cornerOffset1 = new Coordinate(mapWidth - 15, 0);
-		if(!isValidGoal(cornerOffset1)) {
-			cornerOffset1 = getClosestValidCoordinate(cornerOffset1);
-		}
-		if(!isValidGoal(corner2)) {
-			corner2 = getClosestValidCoordinate(corner2);
-		}
-		Coordinate corner3 = new Coordinate(mapWidth - 5, mapHeight - 5);
-		Coordinate cornerOffset2  = new Coordinate(mapWidth - 15, mapHeight - 15);
-		if(!isValidGoal(cornerOffset2)) {
-			cornerOffset2 = getClosestValidCoordinate(cornerOffset2);
-		}
-		if(!isValidGoal(corner3)) {
-			corner3 = getClosestValidCoordinate(corner3);
-		}
-		Coordinate corner4 = new Coordinate(0, mapHeight - 5);
-		Coordinate cornerOffset3 = new Coordinate(0, mapHeight - 15);
-		if(!isValidGoal(cornerOffset3)) {
-			cornerOffset3 = getClosestValidCoordinate(cornerOffset3);
-		}
-		if(!isValidGoal(corner4)) {
-			corner4 = getClosestValidCoordinate(corner4);
-		}
-		Coordinate midPoint = new Coordinate(mapWidth/2, mapHeight/2);
-		if(!isValidGoal(midPoint)) {
-			midPoint = getClosestValidCoordinate(midPoint);
-		}
-		ArrayList <Coordinate>  candidateGoal = new ArrayList <Coordinate> ();
+		int tempWidth = mapWidth;
+		int tempHeight = mapHeight;
 		
-		candidateGoal.add(corner1);
-		candidateGoal.add(corner2);
-		candidateGoal.add(cornerOffset1);
-		candidateGoal.add(midPoint);
-		candidateGoal.add(corner3);
-		candidateGoal.add(cornerOffset2);
-		candidateGoal.add(corner4);	
-		candidateGoal.add(cornerOffset3);
-		
-		for (Coordinate c : candidateGoal) {
+		for(int i = 0; i < tempWidth; i = i + 4) {
+			Coordinate c = getValidGoal(new Coordinate(i, 0));
 			if (getManhattanDistance(c, starPos) > 5) {
-				futureGoal.add(c);
+				futureGoal.add(getValidGoal(c));
 			}
 		}
+		
+		for(int i = 0; i < tempWidth; i = i + 4) {
+			Coordinate c = getValidGoal(new Coordinate(i, tempHeight - 1));
+			if (getManhattanDistance(c, starPos) > 5) {
+				futureGoal.add(getValidGoal(c));
+			}
+		}
+		
+		for(int i = 0; i < tempHeight; i = i + 8) {
+			Coordinate c = getValidGoal(new Coordinate(0, i));
+			if (getManhattanDistance(c, starPos) > 5) {
+				futureGoal.add(getValidGoal(c));
+			}
+		}
+		
+		for(int i = 0; i < tempHeight; i = i + 8) {
+			Coordinate c = getValidGoal(new Coordinate(tempWidth - 1, i));
+			if (getManhattanDistance(c, starPos) > 5) {
+				futureGoal.add(getValidGoal(c));
+			}
+		}
+		futureGoal.add(getValidGoal(new Coordinate( tempWidth/2, tempHeight/2)));
 		Collections.sort(futureGoal, new priorityComparator());
 	}
-
+	public Coordinate getValidGoal(Coordinate c) {
+		if(!isValidGoal(c)) {
+			return getClosestValidCoordinate(c);
+		}
+		return c;
+	}
+	
 	private class priorityComparator implements Comparator<Coordinate>{
 		@Override
 		public int compare(Coordinate c1, Coordinate c2) {
@@ -130,6 +119,10 @@ public class GoalMaker {
 			}
 		}
 		return target;
+	}
+	
+	public void updateVisited(Coordinate c) {
+		visitedPoint.add(c); 
 	}
 	
 	public int getManhattanDistance(Coordinate c1, Coordinate c2) {
@@ -222,20 +215,24 @@ public class GoalMaker {
 		}
 	}
 	
-	
+	public boolean hasAllKeys() {
+		int keyNumbers = car.numKeys;
+		for (int i = 1; i <= keyNumbers; i++) {
+			if(!car.getKeys().contains(i)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public Coordinate getCurrGoal() {
-		System.out.println(futureGoal.size());
-		if(futureGoal.size() == 0) {
+		if(hasAllKeys()) {
 			return exit;
-		} 
+		}
 		if (futureGoal.size() > 0) {
 			return futureGoal.get(0);
 		}else {
 			return exit;
 		}
 	}
-
-
 }
-
-
