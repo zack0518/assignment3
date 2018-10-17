@@ -64,14 +64,14 @@ public class MyAIController extends CarController {
 		Coordinate currentPosition = new Coordinate(getPosition());
 		currGoal.evaluateCurrentView(currentView);
 		currDistination = currGoal.getCurrGoal();
-		System.out.println("dest "+currDistination);
 		Coordinate currPos = new Coordinate(getPosition());
-		if (currPos == currDistination) {
+		if (currPos.equals(currDistination)) {
+			System.out.println("reached!!!");
 			currGoal.reachedTheGoal(currPos);
+			currDistination = currGoal.getCurrGoal();
 			applyBrake();
 		}
-		
-		
+		System.out.println("dest "+currDistination);
 		// checkStateChange();
 		if(getSpeed() < CAR_MAX_SPEED){       // Need speed to turn and progress toward the exit
 			applyForwardAcceleration();   // Tough luck if there's a wall in the way

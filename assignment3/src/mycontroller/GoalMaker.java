@@ -151,7 +151,6 @@ public class GoalMaker {
 	}
 	
 	public Coordinate getCurrGoal() {
-
 		return futureGoal.get(0);
 	}
 }
