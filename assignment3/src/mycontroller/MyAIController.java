@@ -46,7 +46,7 @@ public class MyAIController extends CarController {
 	public HashMap<Coordinate, MapTile> exploreMap = new HashMap<>();
 	private HashSet<Coordinate> closedSet = new HashSet<>();
 	HashMap<Coordinate, MapTile> currentMap;
-	public static HashMap<Coordinate, MapTile> theMapWeVisited = new HashMap<>();
+	public static HashMap<Coordinate, String> theMapWeVisited = new HashMap<>();
 
 	private GoalMaker currGoal;
 	private Coordinate currDistination;
@@ -60,6 +60,10 @@ public class MyAIController extends CarController {
 		currGoal = new GoalMaker(mapWidth(), mapHeight(), getMap(), car);
 		currentMap = getMap();
 		keyNumbers = car.numKeys;
+		
+		for(Coordinate c:currentMap.keySet()) {
+			theMapWeVisited.put(c, currentMap.get(c).getType().toString());
+		}
 	}
 
 	
@@ -82,6 +86,8 @@ public class MyAIController extends CarController {
 			if (currentView.get(c).isType(Type.TRAP)) {
 				currentMap.put(c, currentView.get(c));
 				TrapTile trapTile = (TrapTile) currentView.get(c);
+				String string1 = trapTile.getTrap().toString();
+				theMapWeVisited.put(c, string1);
 				if (trapTile.getTrap().equals("health")) {
 					health.add(c);
 				}
@@ -110,7 +116,10 @@ public class MyAIController extends CarController {
 		if (getSpeed() < CAR_MAX_SPEED && stop == false) { // Need speed to turn and progress toward the exit
 			applyForwardAcceleration();// Tough luck if there's a wall in the way
 		}
-		move(currentPosition, currDistination, mapTest);	
+		move(currentPosition, currDistination, mapTest);
+		System.out.print(currentPosition);
+		System.out.print("  +  ");
+		System.out.println(theMapWeVisited);
 	}
 
 	private boolean checkShouldBrake(HashMap<Coordinate, MapTile> currentView, Coordinate pos) {
