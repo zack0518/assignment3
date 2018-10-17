@@ -32,7 +32,7 @@ public class MyAIController extends CarController {
 	private boolean isFollowingWall = false; // This is set to true when the car starts sticking to a wall.
 
 	// Car Speed to move at
-	private final int CAR_MAX_SPEED = 1;
+	private final int CAR_MAX_SPEED = 5;
 
 	private HashSet<Coordinate> lava = new HashSet<Coordinate>();
 	private HashSet<Coordinate> grass = new HashSet<Coordinate>();
@@ -80,8 +80,8 @@ public class MyAIController extends CarController {
 		if (currPos.equals(currDistination)) {
 			currGoal.reachedTheGoal(currPos);
 			currDistination = currGoal.getCurrGoal();
-			applyBrake();
-			stop = true;
+//			applyBrake();
+//			stop = true;
 
 		}
 		if (checkShouldBrake(currentView, new Coordinate(getPosition()))) {
@@ -96,6 +96,7 @@ public class MyAIController extends CarController {
 			applyForwardAcceleration(); // Tough luck if there's a wall in the way
 		}
 		move(currentPosition, currDistination, mapTest);
+
 	}
 
 	private boolean checkShouldBrake(HashMap<Coordinate, MapTile> currentView, Coordinate pos) {
@@ -119,14 +120,13 @@ public class MyAIController extends CarController {
 			path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap, currentView);
 		}
 
-		System.out.println(path);
+
 		if (path.size() >= 2) {
 			Coordinate nextPoisition = path.get(1);
 			moveToGoal(currentPosition, nextPoisition, getOrientation());
 			TrapTile tile;
 			if (currentView.get(nextPoisition).isType(MapTile.Type.TRAP)) {
 				tile = (TrapTile) currentView.get(nextPoisition);
-				System.out.println(tile.getTrap());
 				if (tile.getTrap().equals("mud")) {
 					applyBrake();
 					

@@ -15,6 +15,7 @@ public class DetectAroundSensor {
 		this.wallSensitivity = wallSensitivity;
 		this.car = car;
 	}
+
 	/**
 	 * Check if you have a wall in front of you!
 	 * @param orientation the orientation we are in based on WorldSpatial

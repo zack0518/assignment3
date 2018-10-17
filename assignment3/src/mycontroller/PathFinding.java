@@ -15,6 +15,7 @@ import utilities.Coordinate;
 public class PathFinding {
 
 	private static final int LAVA_COEFFICIENT = 100;
+	private static final float MUD_COEFFICIENT = Float.MAX_VALUE;
 	private static final int GRASS_COEFFICIENT = 2;
 	private static final float HEALTH_COEFFICIENT = 0.1f;
 	
@@ -127,6 +128,10 @@ public class PathFinding {
 	    	
 	    	if (trapTile.getTrap().equals("grass")) {
 	    		gCost *= GRASS_COEFFICIENT;
+	    	}
+	    	
+	    	if (trapTile.getTrap().equals("mud")) {
+	    		gCost *= MUD_COEFFICIENT;
 	    	}
 	    	 	
 		}
