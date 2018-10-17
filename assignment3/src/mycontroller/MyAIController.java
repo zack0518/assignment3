@@ -47,10 +47,6 @@ public class MyAIController extends CarController {
 		super(car);
 		sensor = new DetectAroundSensor(wallSensitivity,car);
 		currGoal = new GoalMaker(mapWidth(), mapHeight(), getMap(),car);
-//		currDistination = currGoal.getRandomGoal();
-		Coordinate coordinate = new Coordinate(-1,-1);
-//		System.out.println(currDistination);
-		previous.addFirst(coordinate);
 	}
 	
 	// Coordinate initialGuess;
@@ -60,7 +56,8 @@ public class MyAIController extends CarController {
 		// Gets what the car can see
 		HashMap<Coordinate, MapTile> currentView = getView();
 		HashMap<Coordinate, MapTile> currentMap = getMap();
-
+		
+		
 		Coordinate currentPosition = new Coordinate(getPosition());
 		currGoal.evaluateCurrentView(currentView);
 		currDistination = currGoal.getCurrGoal();
@@ -82,6 +79,9 @@ public class MyAIController extends CarController {
 
 	private void move(Coordinate currentPosition, Coordinate currDistination, HashMap<Coordinate, MapTile> currentMap) {
 		// TODO Auto-generated method stub
+		if (getHealth() != 100 && ) {
+			
+		}
 		List<Coordinate> path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap);
 		System.out.println(path);
 	    if (path == null) {
