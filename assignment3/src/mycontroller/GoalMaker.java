@@ -1,5 +1,8 @@
 package mycontroller;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
@@ -9,6 +12,8 @@ import tiles.MapTile;
 import tiles.TrapTile;
 import utilities.Coordinate;
 import world.Car;
+
+
 
 public class GoalMaker {
 	
@@ -24,7 +29,7 @@ public class GoalMaker {
 	public Car car;
 	public boolean shouldBrake;
 	public Coordinate exit;
-	public Coordinate preLoc;
+	public Coordinate starPos;
 	
 	GoalMaker (int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> currentMap, Car car){
 		this.mapWidth = mapWidth;
@@ -39,7 +44,7 @@ public class GoalMaker {
 	}
 
 	public void predefinedGoals() {
-		Coordinate currPos = new Coordinate(this.car.getPosition());
+		starPos = new Coordinate(this.car.getPosition());
 		Coordinate corner1 = new Coordinate(0,0);
 		if(!isValidGoal(corner1)) {
 			corner1 = getClosestValidCoordinate(corner1);
@@ -84,12 +89,25 @@ public class GoalMaker {
 		candidateGoal.add(cornerOffset3);
 		
 		for (Coordinate c : candidateGoal) {
-			if (getManhattanDistance(c, currPos) > 5) {
+			if (getManhattanDistance(c, starPos) > 5) {
 				futureGoal.add(c);
 			}
 		}
+		Collections.sort(futureGoal, new priorityComparator());
+	}
+
+	private class priorityComparator implements Comparator<Coordinate>{
+		@Override
+		public int compare(Coordinate c1, Coordinate c2) {
+			int manhantanDistance1 = getManhattanDistance(c1, starPos);
+			int manhantanDistance2 = getManhattanDistance(c2, starPos);
+			return manhantanDistance1 - manhantanDistance2;
+		}
 	}
 	
+	public void sortGoals() {
+		
+	}
 	public boolean isValidGoal(Coordinate coordinate) {
 		if (currentMap.get(coordinate).getType() == MapTile.Type.ROAD) {
 			return true;
@@ -118,18 +136,6 @@ public class GoalMaker {
 	}
 	
 	public void evaluateCurrentView(HashMap<Coordinate, MapTile> currentView) { 
-		Coordinate currGoal = futureGoal.get(0);
-		System.out.println(currGoal);
-		if (currentView.get(currGoal)!=null) {
-			if(currentView.get(currGoal).getType() == MapTile.Type.TRAP) {
-				TrapTile currTrap = (TrapTile) currentView.get(currGoal);
-				System.out.println(currTrap.getTrap());
-				if(currTrap.getTrap().equals("mud")) {
-					futureGoal.remove(0);
-				}
-			}
-		}
-		
 		for(Coordinate c : currentView.keySet()) {
 			boolean isVisitedGoal = isVisitedGoal(c);
 			if(currentView.get(c).getType() == MapTile.Type.TRAP && !isVisitedGoal) {
@@ -202,6 +208,7 @@ public class GoalMaker {
 	}
 	
 	public Coordinate getCurrGoal() {
+		System.out.println(futureGoal.get(0));
 		if(car.getKeys().size() == car.numKeys) {
 			return exit;
 		}

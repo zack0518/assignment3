@@ -55,8 +55,6 @@ public class PathFinding {
 				return getThePathList(currentNode);
 			}
 			
-
-			
 //			List<Coordinate> neighbors = getNeighbors(currentNode, currentView);
 			
 			List<Coordinate> neighbors = getNeighbors(currentNode);
@@ -139,7 +137,6 @@ public class PathFinding {
 		
 	}
 	
-
 	private static List<Coordinate> getNeighbors(Coordinate currentNode) {
 		// TODO Auto-generated method stub
 		List<Coordinate> neighbors = new ArrayList<>();
