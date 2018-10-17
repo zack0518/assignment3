@@ -118,6 +118,18 @@ public class GoalMaker {
 	}
 	
 	public void evaluateCurrentView(HashMap<Coordinate, MapTile> currentView) { 
+		Coordinate currGoal = futureGoal.get(0);
+		System.out.println(currGoal);
+		if (currentView.get(currGoal)!=null) {
+			if(currentView.get(currGoal).getType() == MapTile.Type.TRAP) {
+				TrapTile currTrap = (TrapTile) currentView.get(currGoal);
+				System.out.println(currTrap.getTrap());
+				if(currTrap.getTrap().equals("mud")) {
+					futureGoal.remove(0);
+				}
+			}
+		}
+		
 		for(Coordinate c : currentView.keySet()) {
 			boolean isVisitedGoal = isVisitedGoal(c);
 			if(currentView.get(c).getType() == MapTile.Type.TRAP && !isVisitedGoal) {
@@ -154,8 +166,6 @@ public class GoalMaker {
 	public boolean shouldTrapBecomeGoal(TrapTile trapTile, Coordinate c) {
 		if(trapTile.getTrap().equals("lava")){
 			LavaTrap lavaTrap = (LavaTrap) trapTile;
-			System.out.println(lavaTrap.getKey());
-			System.out.println("has the key ? "+ isHasTheKey(lavaTrap.getKey()));
 			if (lavaTrap.getKey() > 0 && !isHasTheKey(lavaTrap.getKey()) && !isVisitedGoal(c)) {
 				return true;
 			}
@@ -185,8 +195,13 @@ public class GoalMaker {
 		car.getKeys();
 	}
 	
+	public void cancelGoal() {
+		if(futureGoal.size() > 0) {
+			futureGoal.remove(0);
+		}
+	}
+	
 	public Coordinate getCurrGoal() {
-		System.out.println("curr goal "+futureGoal.get(0));
 		if(car.getKeys().size() == car.numKeys) {
 			return exit;
 		}
