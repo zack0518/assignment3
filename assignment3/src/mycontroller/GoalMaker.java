@@ -13,7 +13,7 @@ public class GoalMaker {
 	public int mapHeight;
 	HashMap<Coordinate, MapTile> currentMap;
 	
-	GoalMaker (int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> currentMap){
+	public GoalMaker (int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> currentMap){
 		this.mapWidth = mapWidth;
 		this.mapHeight = mapHeight;
 		this.currentMap = currentMap;
