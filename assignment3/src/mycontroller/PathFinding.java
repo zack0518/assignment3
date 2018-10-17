@@ -82,11 +82,7 @@ public class PathFinding {
 				costSum.put(c, gCost);
 				float fCost = gCost + getManhattanDistance(c, goal);
 				unexploreNodes.put(c, fCost);
-				
 			}
-
-			
-			
 		}
 		
 		return null;	
@@ -102,7 +98,6 @@ public class PathFinding {
 	      current = previousNode.get(current);
 	      path.add(current);
 	    }
-
 	    Collections.reverse(path);
 	    return path;
 	}
