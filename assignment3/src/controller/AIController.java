@@ -75,7 +75,7 @@ public class AIController extends CarController {
 
 
 	private void move(Coordinate currentPosition, Coordinate currDistination, HashMap<Coordinate, MapTile> currentMap) {
-			// TODO Auto-generated method stub
+		// TODO Auto-generated method stub
 		List<Coordinate> path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap);
 		
 	    if (path == null) {
@@ -91,15 +91,11 @@ public class AIController extends CarController {
 		  Direction relativeDirection = faceToGoal(currentPosition, nextPoisition);
 
 		  if (relativeDirection != direction) {
-//		      int relativeDirectionNumber = getNumberOfDirection(relativeDirection);
-//		      int currentDirectionNumber = getNumberOfDirection(direction);
-//		      int offsetNumber = currentDirectionNumber - relativeDirectionNumber;
-			  int offsetNumber = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
-		      if (offsetNumber == 1
-		          || offsetNumber == -3) {
+			  int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
+		      if (directionNum == 1 || directionNum == -3) {
 		        turnLeft();
-		      } else if (offsetNumber == 2 || offsetNumber == -2) {
-		        if (checkWallAhead(direction)) {
+		      } else if (directionNum == 2 || directionNum == -2) {
+		    	  if (checkWallAhead(direction)) {
 		          turnRight();
 		        } else {
 		          turnLeft();
@@ -111,27 +107,6 @@ public class AIController extends CarController {
 		    }
 		  }
 
-
-//	private void moveToGoal(Coordinate currentPosition, Coordinate nextPoisition, Direction orientation) {
-//		// TODO Auto-generated method stub
-//		Direction direction = faceToGoal(currentPosition, nextPoisition);
-//		
-//		if (direction != orientation) {
-//			int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(orientation);
-//			
-//			if (directionNum == 1 || directionNum == -3) {
-//				turnLeft();
-//			} else if (directionNum == 2 || directionNum == -2) {
-//				if (checkWallAhead(orientation)) {
-//					turnRight();
-//				} else {
-//					turnLeft();
-//				}
-//			} else {
-//				turnRight();
-//			}
-//		}
-//	}
 
 	private int getNumberOfDirection(Direction direction) {
 		
