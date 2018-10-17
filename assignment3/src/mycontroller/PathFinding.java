@@ -15,12 +15,13 @@ import utilities.Coordinate;
 public class PathFinding {
 
 	private static final int LAVA_COEFFICIENT = 100;
-	private static final int GRASS_COEFFICIENT = 10;
+	private static final int GRASS_COEFFICIENT = 2;
 	private static final float HEALTH_COEFFICIENT = 0.1f;
 	
 //	private static Coordinate start;
 //	private static Coordinate goal;
 	private static HashMap<Coordinate, MapTile> map = new HashMap<>();
+	private static HashMap<Coordinate, MapTile> currentView = new HashMap<>();
 	
 	private static List<Coordinate> exploreNodes; // the node visited
 	private static HashMap<Coordinate, Float> unexploreNodes; // the node can see, but not visited
@@ -29,8 +30,9 @@ public class PathFinding {
 	
 	
 	public static List<Coordinate> aStarFindPath(Coordinate star, Coordinate goal, 
-			HashMap<Coordinate, MapTile> currentMap) {
+			HashMap<Coordinate, MapTile> currentMap, HashMap<Coordinate, MapTile> currentView1) {
 		
+//		currentView = currentView1;
 		map = currentMap;
 		exploreNodes = new ArrayList<>();
 		unexploreNodes = new HashMap<>();
@@ -67,8 +69,10 @@ public class PathFinding {
 					unexploreNodes.put(c, Float.MAX_VALUE);
 				}
 				
-				float gCost = costSum.get(currentNode) + getCost(currentNode, c);
-				
+				float gCost = costSum.get(currentNode) + getCost(currentNode, c, currentView);
+//				System.out.print(c);
+//				System.out.print("    ");
+//				System.out.println(gCost);
 				if (costSum.containsKey(c) ){
 					if (gCost >= costSum.get(c)) {
 						continue;
@@ -81,7 +85,7 @@ public class PathFinding {
 				unexploreNodes.put(c, fCost);
 				
 			}
-			
+
 			
 			
 		}
@@ -104,12 +108,13 @@ public class PathFinding {
 	    return path;
 	}
 
-	private static Float getCost(Coordinate currentNode, Coordinate neighbor) {
+	private static Float getCost(Coordinate currentNode, Coordinate neighbor, HashMap<Coordinate, MapTile> currentView) {
 		// TODO Auto-generated method stub
 		// for route, gCost = manhattanDistance
 		float gCost = getManhattanDistance(currentNode, neighbor);
 		// for Trap, multiple by coefficient
 	    MapTile neighborTile = map.get(neighbor);
+
 	    if (neighborTile != null && neighborTile.isType(MapTile.Type.TRAP)) {
 	    	TrapTile trapTile = (TrapTile) neighborTile;
 	    	if (trapTile.getTrap().equals("lava")) {
@@ -140,6 +145,7 @@ public class PathFinding {
 				neighbors.add(c);
 			}
 		}
+
 		return neighbors;
 	}
 

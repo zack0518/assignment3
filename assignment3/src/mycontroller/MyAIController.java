@@ -25,16 +25,16 @@ import world.WorldSpatial.Direction;
 import mycontroller.*;
 
 public class MyAIController extends CarController {
-	
+
 	// How many minimum units the wall is away from the player.
 	private int wallSensitivity = 1;
-	
+
 	private boolean isFollowingWall = false; // This is set to true when the car starts sticking to a wall.
-	
+
 	// Car Speed to move at
 	private final int CAR_MAX_SPEED = 1;
-	
-	private HashSet<Coordinate> lava  = new HashSet<Coordinate>();
+
+	private HashSet<Coordinate> lava = new HashSet<Coordinate>();
 	private HashSet<Coordinate> grass = new HashSet<Coordinate>();
 	private HashSet<Coordinate> mud = new HashSet<Coordinate>();
 	private HashSet<Coordinate> health = new HashSet<Coordinate>();
@@ -42,26 +42,37 @@ public class MyAIController extends CarController {
 	private Queue<Coordinate> previous = new Queue<Coordinate>();
 	public HashMap<Coordinate, MapTile> exploreMap = new HashMap<>();
 	private HashSet<Coordinate> closedSet = new HashSet<>();
-	
+	HashMap<Coordinate, MapTile> currentMap;
+	public static HashMap<Coordinate, MapTile> theMapWeVisited = new HashMap<>();
+
 	private GoalMaker currGoal;
 	private Coordinate currDistination;
 	private DetectAroundSensor sensor;
-	
+
 	public MyAIController(Car car) {
 		super(car);
-		sensor = new DetectAroundSensor(wallSensitivity,car);
-		currGoal = new GoalMaker(mapWidth(), mapHeight(), getMap(),car);
+		sensor = new DetectAroundSensor(wallSensitivity, car);
+		currGoal = new GoalMaker(mapWidth(), mapHeight(), getMap(), car);
+		currentMap = getMap();
 	}
-	
+
 	// Coordinate initialGuess;
 	// boolean notSouth = true;
 	@Override
 	public void update() {
 		// Gets what the car can see
 		HashMap<Coordinate, MapTile> currentView = getView();
-		HashMap<Coordinate, MapTile> currentMap = getMap();
-		boolean stop = false;
+		HashMap<Coordinate, MapTile> mapTest = getMap();
 		
+		for(Coordinate c: currentView.keySet()) {
+			if (currentView.get(c).isType(Type.TRAP)) {
+				currentMap.put(c, currentView.get(c));
+			}
+
+		}
+		
+		boolean stop = false;
+
 		Coordinate currentPosition = new Coordinate(getPosition());
 		currGoal.evaluateCurrentView(currentView);
 		currDistination = currGoal.getCurrGoal();
@@ -71,104 +82,212 @@ public class MyAIController extends CarController {
 			currDistination = currGoal.getCurrGoal();
 			applyBrake();
 			stop = true;
-			
+
 		}
 		if (checkShouldBrake(currentView, new Coordinate(getPosition()))) {
 			applyBrake();
 			stop = true;
-			if (getHealth() == 100) {
+			if (getHealth() == 100 ) {
 				stop = false;
 			}
 		}
 		// checkStateChange();
-		if(getSpeed() < CAR_MAX_SPEED && !stop ){       // Need speed to turn and progress toward the exit
-			applyForwardAcceleration();   // Tough luck if there's a wall in the way
+		if (getSpeed() < CAR_MAX_SPEED && stop == false) { // Need speed to turn and progress toward the exit
+			applyForwardAcceleration(); // Tough luck if there's a wall in the way
 		}
-		move(currentPosition, currDistination, currentMap);
+		move(currentPosition, currDistination, mapTest);
 	}
 
 	private boolean checkShouldBrake(HashMap<Coordinate, MapTile> currentView, Coordinate pos) {
-		if(currentView.get(pos).getType() == MapTile.Type.TRAP) {
+		if (currentView.get(pos).getType() == MapTile.Type.TRAP) {
 			TrapTile trapTile = (TrapTile) currentView.get(pos);
-			if (trapTile.getTrap().equals("health")) {
+			if (trapTile.getTrap().equals("health") || trapTile.getTrap().equals("mud")) {
 				return true;
 			}
 		}
 		return false;
 	}
+
 	private void move(Coordinate currentPosition, Coordinate currDistination, HashMap<Coordinate, MapTile> currentMap) {
 		// TODO Auto-generated method stub
+		HashMap<Coordinate, MapTile> currentView = getView();
 		List<Coordinate> path = new ArrayList<>();
-		if (getHealth() <= 100 && !health.isEmpty() ) {
+		if (getHealth() <= 100 && !health.isEmpty()) {
 			Coordinate nearestHealth = getShortPath(currentPosition, health);
-			path = PathFinding.aStarFindPath(currentPosition, nearestHealth, currentMap);
+			path = PathFinding.aStarFindPath(currentPosition, nearestHealth, currentMap, currentView);
 		} else {
-			path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap);
-		}
-		System.out.println(path.get(path.size() -1 ));
-	    if (path == null) {
-	        throw new IllegalArgumentException("No path to the given destination.");
-	      }
-	      if (path.size() >= 2) {
-	        Coordinate nextPoisition = path.get(1);
-	        moveToGoal(currentPosition, nextPoisition, getOrientation());
-	      }
+			path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap, currentView);
 		}
 
-	  private Coordinate getShortPath(Coordinate currentPosition, HashSet<Coordinate> health) {
+		System.out.println(path);
+		if (path.size() >= 2) {
+			Coordinate nextPoisition = path.get(1);
+			moveToGoal(currentPosition, nextPoisition, getOrientation());
+			TrapTile tile;
+			if (currentView.get(nextPoisition).isType(MapTile.Type.TRAP)) {
+				tile = (TrapTile) currentView.get(nextPoisition);
+				System.out.println(tile.getTrap());
+				if (tile.getTrap().equals("mud")) {
+					applyBrake();
+					
+				} else {
+					moveToGoal(currentPosition, nextPoisition, getOrientation());
+				}
+				
+			}
+			
+
+			
+//			TrapTile tile = (TrapTile) currentView.get(nextPoisition);
+//			if (tile.equals("mud")) {
+//				applyReverseAcceleration();
+//			}
+//			else {
+//				moveToGoal(currentPosition, nextPoisition, getOrientation());
+//			}
+//			moveToGoal(currentPosition, nextPoisition, getOrientation());
+//			changeDirection(currentPosition, currDistination, getOrientation());
+		} else {
+			System.out.println("no path find");
+		}
+	}
+
+	private Coordinate getShortPath(Coordinate currentPosition, HashSet<Coordinate> health) {
 		// TODO Auto-generated method stub
-		  int minDistance = 1000;
-		  Coordinate healthNode = null;
-		  for (Coordinate c: health) {
-			  int distance = getManhattanDistance(currentPosition, c);
-			  if (distance <= minDistance) {
+		int minDistance = 1000;
+		Coordinate healthNode = null;
+		for (Coordinate c : health) {
+			int distance = getManhattanDistance(currentPosition, c);
+			if (distance <= minDistance) {
 				healthNode = c;
 			}
-		  }
-		  
-
+		}
 		return healthNode;
 	}
 
-	private void moveToGoal(Coordinate currentPosition, Coordinate nextPoisition, Direction direction) {
-		  Direction relativeDirection = faceToGoal(currentPosition, nextPoisition);
-
-		  if (relativeDirection != direction) {
-			  int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
-		      if (directionNum == 1 || directionNum == -3) {
-		        turnLeft();
-		      } else if (directionNum == 2 || directionNum == -2) {
-		    	  if (sensor.checkWallAheadDistance(direction,getView()) >= wallSensitivity) {
-		          turnRight();
-		        } else {
-		          turnLeft();
-		        }
-		      } 
-		      else {
-		        turnRight();
-		      }
-		    }
-		  }
-
-
-	private int getNumberOfDirection(Direction direction) {
+	private void changeDirection(Coordinate current, Coordinate next, Direction direction) {
+		int deltaX = next.x - current.x;
+		int deltaY = next.y - current.y;
 		
-	    if (direction == Direction.EAST) {
-		      return 0;
-		    } else if (direction == Direction.SOUTH) {
-		      return 1;
-		    } else if (direction == Direction.WEST) {
-		      return 2;
-		    } else {
-		      return 3;
-		    }
+		if (deltaX > 0) {
+			switch (direction) {
+			case NORTH:
+				turnRight();
+				break;
+			case SOUTH:
+				turnLeft();
+				break;
+			case WEST:
+//				applyReverseAcceleration();
+				turnLeft();
+				turnLeft();
+				break;
+
+			default:
+				break;
+			}
+		} else if (deltaX < 0) {
+			switch (direction) {
+			case SOUTH:
+				turnRight();
+				break;
+			case NORTH:
+				turnLeft();
+				break;
+			case EAST:
+//				applyReverseAcceleration();
+				turnLeft();
+				turnLeft();
+				break;
+
+			default:
+				break;
+			}
+			
+		} else if (deltaY > 0) {
+			switch (direction) {
+			case WEST:
+				turnRight();
+				break;
+			case EAST:
+				turnLeft();
+				break;
+			case SOUTH:
+//				applyReverseAcceleration();
+				turnLeft();
+				turnLeft();
+				break;
+
+			default:
+				break;
+			}
+			
+		} else if (deltaY < 0) {
+			switch (direction) {
+			case EAST:
+				turnRight();
+				break;
+			case WEST:
+				turnLeft();
+				break;
+			case SOUTH:
+//				applyReverseAcceleration();
+				turnLeft();
+				turnLeft();
+				break;
+
+			default:
+				break;
+			}
+			
+		}
+
 	}
 	
+	private void moveToGoal(Coordinate currentPosition, Coordinate nextPoisition, Direction direction) {
+		Direction relativeDirection = faceToGoal(currentPosition, nextPoisition);
+
+		if (relativeDirection != direction) {
+			int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
+			if (directionNum == 1) {
+				turnLeft();
+			} else if (directionNum == -3) {
+				turnLeft();
+			}
+
+			else if (directionNum == 2 || directionNum == -2) {
+				if (sensor.checkWallAheadDistance(direction, getView()) >= wallSensitivity) {
+//					turnRight();
+					applyReverseAcceleration();
+				} else {
+//					turnLeft();
+					applyReverseAcceleration();
+
+				}
+			} else {
+				turnRight();
+			}
+		}
+	}
+
+	private int getNumberOfDirection(Direction direction) {
+
+		if (direction == Direction.EAST) {
+			return 1;
+		} else if (direction == Direction.SOUTH) {
+			return 2;
+		} else if (direction == Direction.WEST) {
+			return 3;
+		} else {
+			return 4;
+		}
+	}
+
 	private Direction faceToGoal(Coordinate currentPosition, Coordinate nextPoisition) {
-	// TODO Auto-generated method stub
+		// TODO Auto-generated method stub
 		int deltaX = nextPoisition.x - currentPosition.x;
 		int deltaY = nextPoisition.y - currentPosition.y;
-		
+
 		if (deltaX > 0) {
 			return Direction.EAST;
 		} else if (deltaX < 0) {
@@ -178,14 +297,13 @@ public class MyAIController extends CarController {
 		} else if (deltaY < 0) {
 			return Direction.SOUTH;
 		}
-		
+
 		return null;
 	}
-	
-	public static int getManhattanDistance(Coordinate a, Coordinate b){
+
+	public static int getManhattanDistance(Coordinate a, Coordinate b) {
 		int distance = Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 		return distance;
 	}
 
-	
 }
