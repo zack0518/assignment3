@@ -11,9 +11,12 @@ import com.badlogic.gdx.math.Path;
 import com.badlogic.gdx.utils.Queue;
 
 import controller.CarController;
+import tiles.HealthTrap;
+import tiles.LavaTrap;
 import tiles.MapTile;
 import tiles.MapTile.Type;
 import tiles.MudTrap;
+import tiles.TrapTile;
 import utilities.Coordinate;
 import world.Car;
 import world.WorldSpatial;
@@ -63,12 +66,13 @@ public class MyAIController extends CarController {
 		currDistination = currGoal.getCurrGoal();
 		Coordinate currPos = new Coordinate(getPosition());
 		if (currPos.equals(currDistination)) {
-			System.out.println("reached!!!");
 			currGoal.reachedTheGoal(currPos);
 			currDistination = currGoal.getCurrGoal();
 			applyBrake();
 		}
-		System.out.println("dest "+currDistination);
+		if (checkShouldBrake(currentView, new Coordinate(getPosition()))) {
+			applyBrake();
+		}
 		// checkStateChange();
 		if(getSpeed() < CAR_MAX_SPEED){       // Need speed to turn and progress toward the exit
 			applyForwardAcceleration();   // Tough luck if there's a wall in the way
@@ -76,14 +80,21 @@ public class MyAIController extends CarController {
 		move(currentPosition, currDistination, currentMap);
 	}
 
-
+	private boolean checkShouldBrake(HashMap<Coordinate, MapTile> currentView, Coordinate pos) {
+		if(currentView.get(pos).getType() == MapTile.Type.TRAP) {
+			TrapTile trapTile = (TrapTile) currentView.get(pos);
+			if (trapTile.getTrap().equals("health")) {
+				return true;
+			}
+		}
+		return false;
+	}
 	private void move(Coordinate currentPosition, Coordinate currDistination, HashMap<Coordinate, MapTile> currentMap) {
 		// TODO Auto-generated method stub
 		if (getHealth() != 100 &&  ) {
 			
 		}
 		List<Coordinate> path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap);
-		System.out.println(path);
 	    if (path == null) {
 	        throw new IllegalArgumentException("No path to the given destination.");
 	      }
