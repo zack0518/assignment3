@@ -44,7 +44,7 @@ public class AIController extends CarController {
 	
 	public AIController(Car car) {
 		super(car);
-		currGoal = new GoalMaker(mapWidth(), mapHeight(), getMap());
+//		currGoal = new GoalMaker(mapWidth(), mapHeight(), getMap());
 //		currDistination = currGoal.getRandomGoal();
 		Coordinate coordinate = new Coordinate(-1,-1);
 //		System.out.println(currDistination);
@@ -89,7 +89,12 @@ public class AIController extends CarController {
 
 	  private void moveToGoal(Coordinate currentPosition, Coordinate nextPoisition, Direction direction) {
 		  Direction relativeDirection = faceToGoal(currentPosition, nextPoisition);
+		  int deltaX = nextPoisition.x - currentPosition.x;
+		  int deltaY = nextPoisition.y - currentPosition.y;
+		  
 
+		
+		  
 		  if (relativeDirection != direction) {
 			  int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
 		      if (directionNum == 1 || directionNum == -3) {
