@@ -87,7 +87,7 @@ public class MyAIController extends CarController {
 		if (checkShouldBrake(currentView, new Coordinate(getPosition()))) {
 			applyBrake();
 			stop = true;
-			if (getHealth() == 100 ) {
+			if (getHealth() == 100) {
 				stop = false;
 			}
 		}
@@ -119,8 +119,21 @@ public class MyAIController extends CarController {
 		} else {
 			path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap, currentView);
 		}
-
-
+		
+		/**
+		 * Cancel the goal if there is mud on goal
+		 */
+		for (Coordinate c : path) {
+			if (currentView.get(c)!=null) {
+				if(currentView.get(c).getType() == MapTile.Type.TRAP) {
+					TrapTile currTrap = (TrapTile) currentView.get(c);
+					if(currTrap.getTrap().equals("mud")) {
+						currGoal.cancelGoal();
+					}
+				}
+			}
+		}
+		
 		if (path.size() >= 2) {
 			Coordinate nextPoisition = path.get(1);
 			moveToGoal(currentPosition, nextPoisition, getOrientation());
@@ -129,14 +142,12 @@ public class MyAIController extends CarController {
 				tile = (TrapTile) currentView.get(nextPoisition);
 				if (tile.getTrap().equals("mud")) {
 					applyBrake();
-					
 				} else {
 					moveToGoal(currentPosition, nextPoisition, getOrientation());
 				}
 				
 			}
 			
-
 			
 //			TrapTile tile = (TrapTile) currentView.get(nextPoisition);
 //			if (tile.equals("mud")) {
