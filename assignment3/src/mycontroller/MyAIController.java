@@ -77,11 +77,12 @@ public class MyAIController extends CarController {
 
 		}
 		
+
+
 		Coordinate currentPosition = new Coordinate(getPosition());
 		currGoal.evaluateCurrentView(currentView);
 		currDistination = currGoal.getCurrGoal();
 		Coordinate currPos = new Coordinate(getPosition());
-		currGoal.updateVisited(currPos);
 		if (currPos.equals(currDistination)) {
 			currGoal.reachedTheGoal(currPos);
 			currDistination = currGoal.getCurrGoal();
