@@ -131,8 +131,8 @@ public class GoalMaker {
 		if(trapTile.getTrap().equals("lava")){
 			LavaTrap lavaTrap = (LavaTrap) trapTile;
 			if (lavaTrap.getKey() > 0) {
-				System.out.println("key found : "+lavaTrap.getKey()) ;
-				System.out.println("key on : "+c);
+//				System.out.println("key found : "+lavaTrap.getKey()) ;
+//				System.out.println("key on : "+c);
 				return true;
 			}
 			
