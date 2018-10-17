@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
-
 import tiles.LavaTrap;
 import tiles.MapTile;
 import tiles.TrapTile;
@@ -30,6 +30,10 @@ public class GoalMaker {
 	public boolean shouldBrake;
 	public Coordinate exit;
 	public Coordinate starPos;
+	public List <KeyAndLocation> keyAndLocaitons;
+	
+//	public static boolean hasAllKeys;
+	
 	
 	GoalMaker (int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> currentMap, Car car){
 		this.mapWidth = mapWidth;
@@ -40,6 +44,7 @@ public class GoalMaker {
 		stuckWarn = new StuckedWarning(car);
 		this.car = car;
 		shouldBrake = false;
+		this.keyAndLocaitons = new ArrayList <KeyAndLocation>();
 		predefinedGoals();
 	}
 
@@ -103,10 +108,6 @@ public class GoalMaker {
 			int manhantanDistance2 = getManhattanDistance(c2, starPos);
 			return manhantanDistance1 - manhantanDistance2;
 		}
-	}
-	
-	public void sortGoals() {
-		
 	}
 	public boolean isValidGoal(Coordinate coordinate) {
 		if (currentMap.get(coordinate).getType() == MapTile.Type.ROAD) {
@@ -172,11 +173,25 @@ public class GoalMaker {
 	public boolean shouldTrapBecomeGoal(TrapTile trapTile, Coordinate c) {
 		if(trapTile.getTrap().equals("lava")){
 			LavaTrap lavaTrap = (LavaTrap) trapTile;
+			if (lavaTrap.getKey() > 0) {
+				KeyAndLocation keyAndLoc = new KeyAndLocation(lavaTrap.getKey(), c);
+			}
 			if (lavaTrap.getKey() > 0 && !isHasTheKey(lavaTrap.getKey()) && !isVisitedGoal(c)) {
+				visitedGoals.add(c);
 				return true;
 			}
-		}else if(trapTile.getTrap().equals("health") && car.getHealth() < 100 && !isVisitedGoal(c)) {
+		}else if(trapTile.getTrap().equals("health") && car.getHealth() < 50 && !isVisitedGoal(c)) {
+			visitedGoals.add(c);
 			return true;
+		}
+		return false;
+	}
+	
+	public boolean isKeySameLoaction(KeyAndLocation currK) {
+		for (KeyAndLocation k : keyAndLocaitons) {
+			if(currK.getLocaiton() == k.getLocaiton()) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -207,14 +222,20 @@ public class GoalMaker {
 		}
 	}
 	
+	
 	public Coordinate getCurrGoal() {
-		if(car.getKeys().size() == car.numKeys) {
+		System.out.println(futureGoal.size());
+		if(futureGoal.size() == 0) {
 			return exit;
-		}
+		} 
 		if (futureGoal.size() > 0) {
 			return futureGoal.get(0);
 		}else {
 			return exit;
 		}
 	}
+
+
 }
+
+
