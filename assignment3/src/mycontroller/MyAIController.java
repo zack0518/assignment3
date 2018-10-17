@@ -79,7 +79,7 @@ public class MyAIController extends CarController {
 
 	private void move(Coordinate currentPosition, Coordinate currDistination, HashMap<Coordinate, MapTile> currentMap) {
 		// TODO Auto-generated method stub
-		if (getHealth() != 100 && ) {
+		if (getHealth() != 100 &&  ) {
 			
 		}
 		List<Coordinate> path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap);
