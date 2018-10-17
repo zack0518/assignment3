@@ -20,6 +20,7 @@ public class GoalMaker {
 	public ArrayList <Coordinate> visitedGoals;
 	public StuckedWarning stuckWarn;
 	public Car car;
+	public boolean shouldBrake;
 	
 	GoalMaker (int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> currentMap, Car car){
 		this.mapWidth = mapWidth;
@@ -29,6 +30,7 @@ public class GoalMaker {
 		visitedGoals = new ArrayList <Coordinate>();
 		stuckWarn = new StuckedWarning(car);
 		this.car = car;
+		shouldBrake = false;
 		predefinedGoals();
 	}
 	
@@ -97,10 +99,13 @@ public class GoalMaker {
 	}
 	
 	public void evaluateCurrentView(HashMap<Coordinate, MapTile> currentView) {
+		shouldBrake = true; 
 		for(Coordinate c : currentView.keySet()) {
 			boolean isVisitedGoal = isVisitedGoal(c);
 			if(currentView.get(c).getType() == MapTile.Type.TRAP && !isVisitedGoal) {
-				shouldTrapBecomeGoal((TrapTile) currentView.get(c), c);
+				if(shouldTrapBecomeGoal((TrapTile) currentView.get(c), c)) {
+					futureGoal.add(0, c);
+				}
 				
 				TrapTile trapTile = (TrapTile) currentView.get(c);
 				if (shouldTrapBecomeGoal(trapTile, c)) {
@@ -110,6 +115,9 @@ public class GoalMaker {
 		}
 	}
 	
+	public boolean shouldBrake() {
+		return shouldBrake; 
+	}
 	public boolean isVisitedGoal(Coordinate currGoal) {
 		for(Coordinate c : visitedGoals) {
 			if (c.x == currGoal.x && c.y == currGoal.y) {
@@ -129,6 +137,7 @@ public class GoalMaker {
 			}
 			
 		}else if(trapTile.getTrap().equals("health")) {
+			shouldBrake = true;
 			return true;
 		}
 		return false;
