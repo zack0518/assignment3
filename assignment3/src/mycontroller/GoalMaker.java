@@ -137,7 +137,8 @@ public class GoalMaker {
 		return Math.abs(c1.x - c2.x) + Math.abs(c1.y - c2.y);
 	}
 	
-	public void evaluateCurrentView(HashMap<Coordinate, MapTile> currentView) { 
+	public void evaluateCurrentView(HashMap<Coordinate, MapTile> currentView) {
+		checkGoalInNoKeyLava(currentView);
 		for(Coordinate c : currentView.keySet()) {
 			boolean isVisitedGoal = isVisitedGoal(c);
 			if(currentView.get(c).getType() == MapTile.Type.TRAP && !isVisitedGoal) {
@@ -154,6 +155,20 @@ public class GoalMaker {
 		if(hasAllKeys() && exit != null) {
 			futureGoal.clear();
 			futureGoal.add(exit);
+		}
+	}
+	
+	public void checkGoalInNoKeyLava(HashMap<Coordinate, MapTile> currentView) {
+		for (Coordinate c : currentView.keySet()) {
+			if(currentView.get(c).getType() == MapTile.Type.TRAP) {
+				TrapTile trapTile = (TrapTile) currentView.get(c);
+				if(trapTile.getTrap().equals("lava")){
+					LavaTrap lavaTrap = (LavaTrap) trapTile;
+					if(lavaTrap.getKey() == 0 && futureGoal.contains(c)) {
+							futureGoal.remove(c);
+					}
+				}
+			}
 		}
 	}
 	
