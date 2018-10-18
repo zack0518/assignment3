@@ -18,6 +18,7 @@ public class PathFinding {
 	private static final float MUD_COEFFICIENT = Float.MAX_VALUE;
 	private static final int GRASS_COEFFICIENT = 2;
 	private static final float HEALTH_COEFFICIENT = 0.1f;
+	private static final float REVERSE_COEFFICIENT = 20;
 	
 //	private static Coordinate start;
 //	private static Coordinate goal;
@@ -28,12 +29,13 @@ public class PathFinding {
 	private static HashMap<Coordinate, Float> unexploreNodes; // the node can see, but not visited
 	private static HashMap<Coordinate, Float> costSum;
 	private static HashMap<Coordinate, Coordinate> previousNode;
+	private static Coordinate previousPos;
 	
 	
 	public static List<Coordinate> aStarFindPath(Coordinate star, Coordinate goal, 
-			HashMap<Coordinate, MapTile> currentMap, HashMap<Coordinate, MapTile> currentView1) {
+			HashMap<Coordinate, MapTile> currentMap, Coordinate previousPos1) {
 		
-//		currentView = currentView1;
+		previousPos = previousPos1;
 		map = currentMap;
 		exploreNodes = new ArrayList<>();
 		unexploreNodes = new HashMap<>();
@@ -69,15 +71,15 @@ public class PathFinding {
 				}
 				
 				float gCost = costSum.get(currentNode) + getCost(currentNode, c, currentView);
-//				System.out.print(c);
-//				System.out.print("    ");
-//				System.out.println(gCost);
 				if (costSum.containsKey(c) ){
 					if (gCost >= costSum.get(c)) {
 						continue;
 					}
 				}
 				
+//				System.out.print(c);
+//				System.out.print(" the neighbor ");
+//				System.out.println(gCost);
 				previousNode.put(c, currentNode);
 				costSum.put(c, gCost);
 				float fCost = gCost + getManhattanDistance(c, goal);
@@ -108,6 +110,10 @@ public class PathFinding {
 		float gCost = getManhattanDistance(currentNode, neighbor);
 		// for Trap, multiple by coefficient
 	    MapTile neighborTile = map.get(neighbor);
+	    
+	    if (currentNode.equals(previousPos)) {
+			gCost *= REVERSE_COEFFICIENT;
+		}
 
 	    if (neighborTile != null && neighborTile.isType(MapTile.Type.TRAP)) {
 	    	TrapTile trapTile = (TrapTile) neighborTile;
@@ -128,6 +134,8 @@ public class PathFinding {
 	    	}
 	    	 	
 		}
+	    
+	    
 	    return gCost;
 		
 	}
