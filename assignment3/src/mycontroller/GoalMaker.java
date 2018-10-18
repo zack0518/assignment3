@@ -50,48 +50,50 @@ public class GoalMaker {
 
 	public void predefinedGoals() {
 		starPos = new Coordinate(this.car.getPosition());
+		moreGoals(8);
+	}
+	
+	public void moreGoals(int offset) {
 		int tempWidth = mapWidth;
 		int tempHeight = mapHeight;
-		
-//		for(int i = 4; i < tempWidth; i = i + 4) {
-//			Coordinate c = getValidGoal(new Coordinate(i, 2));
-//			if (getManhattanDistance(c, starPos) > 5) {
-//				futureGoal.add(c);
-//			}
-//		}
-//		
-//		for(int i = 4; i < tempWidth; i = i + 4) {
-//			Coordinate c = getValidGoal(new Coordinate(i, tempHeight - 2));
-//			if (getManhattanDistance(c, starPos) > 5) {
-//				futureGoal.add(c);
-//			}
-//		}
-//		
-//		for(int i = 4; i < tempHeight; i = i + 4) {
-//			Coordinate c = getValidGoal(new Coordinate(2, i));
-//			if (getManhattanDistance(c, starPos) > 5) {
-//				futureGoal.add(c);
-//			}
-//		}
-//		
-//		for(int i = 4; i < tempHeight; i = i + 4) {
-//			Coordinate c = getValidGoal(new Coordinate(tempWidth - 2, i));
-//			if (getManhattanDistance(c, starPos) > 5) {
-//				futureGoal.add(c);
-//			}
-//		}
-
-		for(int i = 4; i < tempHeight; i = i + 4) {
-			Coordinate c = getValidGoal(new Coordinate(i, tempHeight/2));
-			System.out.println("curr Goal  : " +c);
-			System.out.println(currentMap.get(c).getType());
-			if (getManhattanDistance(c, starPos) > 5) {
+		for(int i = 4; i < tempWidth; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(i, 2));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
 				futureGoal.add(c);
 			}
 		}
 		
+		for(int i = 4; i < tempWidth; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(i, tempHeight - 2));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
+				futureGoal.add(c);
+			}
+		}
+		
+		for(int i = 4; i < tempHeight; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(2, i));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
+				futureGoal.add(c);
+			}
+		}
+		
+		for(int i = 4; i < tempHeight; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(tempWidth - 2, i));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
+				futureGoal.add(c);
+			}
+		}
+
+		
+		for(int i = 4; i < tempHeight; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(i, tempHeight/2 + offset));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
+				futureGoal.add(c);
+			}
+		}
 		futureGoal.add(getValidGoal(new Coordinate( tempWidth/2, tempHeight/2)));
 		Collections.sort(futureGoal, new priorityComparator());
+		
 	}
 	public Coordinate getValidGoal(Coordinate c) {
 		if(!isValidGoal(c)) {
@@ -109,8 +111,17 @@ public class GoalMaker {
 		}
 	}
 	public boolean isValidGoal(Coordinate coordinate) {
-		if (currentMap.get(coordinate).getType() == MapTile.Type.ROAD) {
+		if (currentMap.get(coordinate).getType() == MapTile.Type.ROAD && !isVisited(coordinate)) {
 			return true;
+		}
+		return false;
+	}
+	
+	public boolean isVisited(Coordinate c1) {
+		for (Coordinate c : visitedGoals) {
+			if(c.equals(c1)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -118,7 +129,6 @@ public class GoalMaker {
 	public void reachedTheGoal(Coordinate c) {
 		futureGoal.remove(c);
 		visitedGoals.add(c);
-		
 	}
 	public Coordinate getClosestValidCoordinate(Coordinate coordinate) {
 		int minDistance = Integer.MAX_VALUE;
@@ -154,6 +164,10 @@ public class GoalMaker {
 			}
 		}
 		Collections.sort(futureGoal, new priorityComparator());
+		if(hasAllKeys() && exit != null) {
+			futureGoal.clear();
+			futureGoal.add(exit);
+		}
 	}
 	
 	public boolean isHasTheKey(int key){
@@ -185,7 +199,7 @@ public class GoalMaker {
 				visitedGoals.add(c);
 				return true;
 			}
-		}else if(trapTile.getTrap().equals("health") && car.getHealth() < 50 && !isVisitedGoal(c)) {
+		}else if(trapTile.getTrap().equals("health") && car.getHealth() < 90 && !isVisitedGoal(c)) {
 			visitedGoals.add(c);
 			return true;
 		}
@@ -237,6 +251,9 @@ public class GoalMaker {
 	
 	public Coordinate getCurrGoal() {
 		evaluateCurrentView(car.getView());
+		if (futureGoal.size() == 0 &&(!hasAllKeys() || exit == null)) {
+			moreGoals(4);
+		}
 		if(hasAllKeys()) {
 			return exit;
 		}

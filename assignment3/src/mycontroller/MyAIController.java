@@ -46,7 +46,7 @@ public class MyAIController extends CarController {
 	private HashSet<Coordinate> closedSet = new HashSet<>();
 	HashMap<Coordinate, MapTile> currentMap;
 	public static HashMap<Coordinate, MapTile> theMapWeVisited = new HashMap<>();
-
+	private MoveSimulation moveSimulation;
 	private GoalMaker currGoal;
 	private Coordinate currDistination;
 	private DetectAroundSensor sensor;
@@ -57,6 +57,7 @@ public class MyAIController extends CarController {
 		sensor = new DetectAroundSensor(wallSensitivity, car);
 		currGoal = new GoalMaker(mapWidth(), mapHeight(), getMap(), car);
 		currentMap = getMap();
+		moveSimulation = new MoveSimulation();
 	}
 
 	// Coordinate initialGuess;
@@ -118,8 +119,6 @@ public class MyAIController extends CarController {
 		HashMap<Coordinate, MapTile> currentView = getView();
 		List<Coordinate> path = new ArrayList<>();
 		boolean increaseHealth = false;
-		System.out.println("goal:  "+ currDistination);
-		System.out.println("goal type " + currentMap.get(currDistination).getType());
 		if (getHealth() < 50 && !health.isEmpty()) {
 			Coordinate nearestHealth = getShortPath(currentPosition, health);
 			increaseHealth = true;
@@ -127,7 +126,6 @@ public class MyAIController extends CarController {
 		} else {
 			path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap, currentView);
 		}
-		System.out.println(path);
 		/**
 		 * Cancel the goal if there is mud on goal
 		 */
@@ -192,26 +190,36 @@ public class MyAIController extends CarController {
 		Direction relativeDirection = faceToGoal(currentPosition, nextPoisition);
 
 		if (relativeDirection != direction) {
-			System.out.print(direction);
-			System.out.println(relativeDirection);
 			int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
 			if (directionNum == 1 || directionNum == -3) {
-				if(sensor.checkWallAheadDistance(direction, getView()) <= 1) {
+				if(sensor.checkWallAheadDistance(direction, getView()) <= 1 && sensor.checkWallBehindDistance(direction, getView()) > 1) {
 					applyReverseAcceleration();
 					turnLeft();
 				}
-				turnLeft();
+				if(getSpeed() > 0) {
+					turnLeft();
+				}else {
+					applyReverseAcceleration();
+					turnLeft();
+				}
+				
 			} 
 
 			else if (directionNum == 2 || directionNum == -2) {
 				applyReverseAcceleration();
 			} else {
-				if(sensor.checkWallAheadDistance(direction, getView()) <= 1) {
+				
+				if(sensor.checkWallAheadDistance(direction, getView()) <= 1 && sensor.checkWallBehindDistance(direction, getView()) > 1) {
 					applyReverseAcceleration();
 					turnRight();
 				}
-				System.out.println("turn right----");
-				turnRight();
+				if(getSpeed() > 0) {
+					turnRight();
+				}else {
+					applyReverseAcceleration();
+					turnRight();
+				}
+				
 			}
 		}
 	}

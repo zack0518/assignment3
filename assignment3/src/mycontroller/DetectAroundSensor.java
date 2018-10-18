@@ -35,6 +35,23 @@ public class DetectAroundSensor {
 			return wallSensitivity;
 		}
 	}
+	
+	
+	public int checkWallBehindDistance(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> currentView){
+		switch(orientation){
+		case WEST:
+			return checkEast(currentView);
+		case SOUTH:
+			return checkNorth(currentView);
+		case NORTH:
+			return checkSouth(currentView);
+		case EAST:
+			return checkWest(currentView);
+		default:
+			return wallSensitivity;
+		}
+	}
+	
 	/**
 	 * Method below just iterates through the list and check in the correct coordinates.
 	 * i.e. Given your current position is 10,10
