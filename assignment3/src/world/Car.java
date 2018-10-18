@@ -168,8 +168,10 @@ public class Car extends Sprite{
 				(!currentTile.isType(MapTile.Type.TRAP) ||
 						((TrapTile) currentTile).canTurn())) {
 			if (velocity > 0) {
+
 				currentOrientation = WorldSpatial.changeDirection(currentOrientation, turning.get());
 			} else {
+
 				currentOrientation = WorldSpatial.changeDirection(currentOrientation, WorldSpatial.opposite(turning.get()));
 			}
 		}

@@ -3,52 +3,71 @@ package mycontroller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-
+import java.util.Iterator;
 import java.util.List;
 
-
+import com.badlogic.gdx.graphics.g3d.model.data.ModelMaterial.MaterialType;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleSorter.Distance;
+import com.badlogic.gdx.math.Path;
 import com.badlogic.gdx.utils.Queue;
 
 import controller.CarController;
+import tiles.HealthTrap;
+import tiles.LavaTrap;
 import tiles.MapTile;
 import tiles.MapTile.Type;
+import tiles.MudTrap;
 import tiles.TrapTile;
 import utilities.Coordinate;
 import world.Car;
+import world.WorldSpatial;
 import world.WorldSpatial.Direction;
-
+import mycontroller.*;
 
 public class MyAIController extends CarController {
 
 	// How many minimum units the wall is away from the player.
 	private int wallSensitivity = 1;
-	// Car Speed to move at 5
-	private final int CAR_MAX_SPEED = 5;
-	// Car can stop at a certain position.
+
+	private boolean isFollowingWall = false; // This is set to true when the car starts sticking to a wall.
+
+	// Car Speed to move at
+	private final int CAR_MAX_SPEED = 1;
+	
 	private static boolean stop = false;
 
-	private HashSet<Coordinate> health = new HashSet<Coordinate>(); // record the health trap we explored.
-	private Queue<Coordinate> previous = new Queue<Coordinate>(); // record the last position.
-	
-	HashMap<Coordinate, MapTile> currentMap; // the updated map record all the place we explored.
-
+	private HashSet<Coordinate> lava = new HashSet<Coordinate>();
+	private HashSet<Coordinate> grass = new HashSet<Coordinate>();
+	private HashSet<Coordinate> mud = new HashSet<Coordinate>();
+	private HashSet<Coordinate> health = new HashSet<Coordinate>();
+	private HashSet<Coordinate> choose = new HashSet<Coordinate>();
+	private Queue<Coordinate> previous = new Queue<Coordinate>();
+	public HashMap<Coordinate, MapTile> exploreMap = new HashMap<>();
+	private HashSet<Coordinate> closedSet = new HashSet<>();
+	static HashMap<Coordinate, MapTile> currentMap;
+	public static HashMap<Coordinate, MapTile> theMapWeVisited = new HashMap<>();
 	private GoalMaker currGoal;
 	private Coordinate currDistination;
 	private DetectAroundSensor sensor;
 	
 	private static List<Coordinate> roadCandidates = new ArrayList<>();
 
+	private Coordinate preLoc;
+
+
 	public MyAIController(Car car) {
 		super(car);
 		sensor = new DetectAroundSensor(wallSensitivity, car);
 		currGoal = new GoalMaker(mapWidth(), mapHeight(), getMap(), car);
 		currentMap = getMap();
+		
 		Coordinate initialPrePos = new Coordinate(-1,-1);
 		previous.addFirst(initialPrePos);
 		
 	}
 
-
+	// Coordinate initialGuess;
+	// boolean notSouth = true;
 	@Override
 	public void update() {
 		
@@ -56,7 +75,7 @@ public class MyAIController extends CarController {
 		HashMap<Coordinate, MapTile> currentView = getView();
 		HashMap<Coordinate, MapTile> mapTest = getMap();
 		currDistination = currGoal.getCurrGoal();
-		
+
 		
 		updateMap(currentView, health);
 		
@@ -85,13 +104,15 @@ public class MyAIController extends CarController {
 		previous.removeFirst();
 		previous.addFirst(currentPosition);
 		
-		
+
 		move(currentPosition, currDistination, mapTest, previousPos);		
 
 	}
 
+
 	private void updateMap(HashMap<Coordinate, MapTile> currentView, HashSet<Coordinate> health) {
 		// TODO Auto-generated method stub
+		boolean healthNearWall = false;
 		for(Coordinate c: currentView.keySet()) {
 			if (currentView.get(c).isType(Type.ROAD)) {
 				roadCandidates.add(c);
@@ -101,12 +122,35 @@ public class MyAIController extends CarController {
 				currentMap.put(c, currentView.get(c));
 				TrapTile trapTile = (TrapTile) currentView.get(c);
 				if (trapTile.getTrap().equals("health")) {
-					health.add(c);
+					List<Coordinate> neighbors = getNeighbors(c);
+					for (Coordinate neighbor:neighbors) {
+						if (currentMap.get(neighbor).isType(Type.WALL)) {
+							healthNearWall = true;
+						}
+					}
+					if (healthNearWall == false) {
+						health.add(c);
+					}
+
 				}		
 			}
 		}	
 	}
 
+	
+	public static List<Coordinate> getNeighbors(Coordinate currentNode) {
+		// TODO Auto-generated method stub
+		List<Coordinate> neighbors = new ArrayList<>();
+		for (Coordinate c: currentMap.keySet()) {
+			int distance = getManhattanDistance(c, currentNode);
+			MapTile nodeType = currentMap.get(c);
+			if (distance == 1 ) {
+				neighbors.add(c);
+			}
+		}
+
+		return neighbors;
+	}
 
 	private boolean checkShouldBrake(HashMap<Coordinate, MapTile> currentView, Coordinate pos) {
 		if (currentView.get(pos).getType() == MapTile.Type.TRAP) {
@@ -130,6 +174,7 @@ public class MyAIController extends CarController {
 		} else {
 			path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap, previousPos);
 		}
+
 		/**
 		 * Cancel the goal if there is mud on goal
 		 */
@@ -154,10 +199,10 @@ public class MyAIController extends CarController {
 				applyBrake();
 			}
 			else {
+
 				moveToGoal(currentPosition, nextPoisition, getOrientation());	
 			}
-		
-			} 
+		  } 
 		}
 		if (path == null) {
 			currGoal.cancelGoal();
@@ -169,7 +214,6 @@ public class MyAIController extends CarController {
 		// TODO Auto-generated method stub
 		for(Coordinate c: health) {
 			if (currentPosition.equals(c)) {
-				getHealth();
 				if (getHealth()<100) {
 					return true;
 				}
@@ -183,7 +227,7 @@ public class MyAIController extends CarController {
 		int minDistance = 1000;
 		Coordinate healthNode = null;
 		for (Coordinate c : health) {
-			int distance = util.getManhattanDistance(currentPosition, c);
+			int distance = getManhattanDistance(currentPosition, c);
 			if (distance <= minDistance) {
 				healthNode = c;
 			}
@@ -196,18 +240,30 @@ public class MyAIController extends CarController {
 		Direction relativeDirection = faceToGoal(currentPosition, nextPoisition);
 		
 		if (relativeDirection != direction) {
+
 			int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
 			if (directionNum == 1 || directionNum == -3) {
+
 				turnLeft();
 			} else if (directionNum == 2 || directionNum == -2) {
-				if (sensor.chechWallRight(direction, getView()) <= 1) {
-					turnLeft();
-				} else if (sensor.chechWallLeft(direction, getView()) <=1 ) {
-					turnRight();
+				if (getVelocity() > 0) {
+					if (sensor.chechWallRight(direction, getView()) <= 1) {
+						turnLeft();
+					} else if (sensor.chechWallLeft(direction, getView()) <=1 ) {
+						turnRight();
+					}
+				} else if (getVelocity() < 0) {
+					if (sensor.chechWallRight(direction, getView()) <= 1) {
+						turnRight();
+					} else if (sensor.chechWallLeft(direction, getView()) <=1 ) {
+						turnLeft();
+					}
 				}
 			} else {
+
 				turnRight();
 			}
+			
 			
 		}
 	}
@@ -242,6 +298,34 @@ public class MyAIController extends CarController {
 
 		return null;
 	}
+	
+	boolean lastAccelForward = true;  // Initial value doesn't matter as speed starts as zero
 
+	private int getVelocity() {
+
+	return Math.round(lastAccelForward ? getSpeed() : -getSpeed());
+
+	}
+
+	private void myApplyForwardAcceleration(){ 
+
+	applyForwardAcceleration();
+
+	lastAccelForward = true;
+
+	}
+
+	public void myApplyReverseAcceleration(){
+
+	applyReverseAcceleration();
+
+	lastAccelForward = false;
+
+	}
+
+	public static int getManhattanDistance(Coordinate a, Coordinate b) {
+		int distance = Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+		return distance;
+	}
 
 }

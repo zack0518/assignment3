@@ -7,12 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import tiles.MapTile;
 import tiles.MapTile.Type;
 import tiles.TrapTile;
 import utilities.Coordinate;
-
 
 public class PathFinding {
 
@@ -20,7 +18,7 @@ public class PathFinding {
 	private static final float MUD_COEFFICIENT = Float.MAX_VALUE;
 	private static final int GRASS_COEFFICIENT = 2;
 	private static final float HEALTH_COEFFICIENT = 0.1f;
-	private static final float REVERSE_COEFFICIENT = 20;
+	private static final float REVERSE_COEFFICIENT = 10;
 	
 //	private static Coordinate start;
 //	private static Coordinate goal;
@@ -84,8 +82,7 @@ public class PathFinding {
 //				System.out.println(gCost);
 				previousNode.put(c, currentNode);
 				costSum.put(c, gCost);
-
-                float fCost = gCost + util.getManhattanDistance(c, goal);
+				float fCost = gCost + getManhattanDistance(c, goal);
 				unexploreNodes.put(c, fCost);
 			}
 		}
@@ -143,7 +140,7 @@ public class PathFinding {
 		
 	}
 	
-	private static List<Coordinate> getNeighbors(Coordinate currentNode) {
+	public static List<Coordinate> getNeighbors(Coordinate currentNode) {
 		// TODO Auto-generated method stub
 		List<Coordinate> neighbors = new ArrayList<>();
 		for (Coordinate c: map.keySet()) {
