@@ -1,5 +1,7 @@
 package mycontroller;
 
+
+
 public class TraverseMapMovement extends Movement {
 
 	@Override

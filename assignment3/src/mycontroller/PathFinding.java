@@ -7,10 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import tiles.MapTile;
 import tiles.MapTile.Type;
 import tiles.TrapTile;
 import utilities.Coordinate;
+
 
 public class PathFinding {
 
@@ -82,7 +84,8 @@ public class PathFinding {
 //				System.out.println(gCost);
 				previousNode.put(c, currentNode);
 				costSum.put(c, gCost);
-				float fCost = gCost + getManhattanDistance(c, goal);
+
+                float fCost = gCost + util.getManhattanDistance(c, goal);
 				unexploreNodes.put(c, fCost);
 			}
 		}

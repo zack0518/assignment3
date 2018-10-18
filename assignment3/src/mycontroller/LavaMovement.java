@@ -1,5 +1,7 @@
 package mycontroller;
 
+
+
 public class LavaMovement extends Movement {
 
 	@Override

@@ -1,6 +1,8 @@
 package mycontroller;
 
-public class MovementToExit extends Movement{
+
+
+public class MovementToExit extends Movement {
 
 	@Override
 	public void movement() {

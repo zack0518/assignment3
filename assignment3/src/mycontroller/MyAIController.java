@@ -3,69 +3,50 @@ package mycontroller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+
 import java.util.List;
 
-import com.badlogic.gdx.graphics.g3d.model.data.ModelMaterial.MaterialType;
-import com.badlogic.gdx.graphics.g3d.particles.ParticleSorter.Distance;
-import com.badlogic.gdx.math.Path;
+
 import com.badlogic.gdx.utils.Queue;
 
 import controller.CarController;
-import tiles.HealthTrap;
-import tiles.LavaTrap;
 import tiles.MapTile;
 import tiles.MapTile.Type;
-import tiles.MudTrap;
 import tiles.TrapTile;
 import utilities.Coordinate;
 import world.Car;
-import world.WorldSpatial;
 import world.WorldSpatial.Direction;
-import mycontroller.*;
+
 
 public class MyAIController extends CarController {
 
 	// How many minimum units the wall is away from the player.
 	private int wallSensitivity = 1;
-
-	private boolean isFollowingWall = false; // This is set to true when the car starts sticking to a wall.
-
-	// Car Speed to move at
+	// Car Speed to move at 5
 	private final int CAR_MAX_SPEED = 5;
-	
+	// Car can stop at a certain position.
 	private static boolean stop = false;
 
-	private HashSet<Coordinate> lava = new HashSet<Coordinate>();
-	private HashSet<Coordinate> grass = new HashSet<Coordinate>();
-	private HashSet<Coordinate> mud = new HashSet<Coordinate>();
-	private HashSet<Coordinate> health = new HashSet<Coordinate>();
-	private HashSet<Coordinate> choose = new HashSet<Coordinate>();
-	private Queue<Coordinate> previous = new Queue<Coordinate>();
-	public HashMap<Coordinate, MapTile> exploreMap = new HashMap<>();
-	private HashSet<Coordinate> closedSet = new HashSet<>();
-	HashMap<Coordinate, MapTile> currentMap;
-	public static HashMap<Coordinate, MapTile> theMapWeVisited = new HashMap<>();
-	private MoveSimulation moveSimulation;
+	private HashSet<Coordinate> health = new HashSet<Coordinate>(); // record the health trap we explored.
+	private Queue<Coordinate> previous = new Queue<Coordinate>(); // record the last position.
+	
+	HashMap<Coordinate, MapTile> currentMap; // the updated map record all the place we explored.
+
 	private GoalMaker currGoal;
 	private Coordinate currDistination;
 	private DetectAroundSensor sensor;
-	private Coordinate preLoc;
 
 	public MyAIController(Car car) {
 		super(car);
 		sensor = new DetectAroundSensor(wallSensitivity, car);
 		currGoal = new GoalMaker(mapWidth(), mapHeight(), getMap(), car);
 		currentMap = getMap();
-		moveSimulation = new MoveSimulation();
-		
 		Coordinate initialPrePos = new Coordinate(-1,-1);
 		previous.addFirst(initialPrePos);
 		
 	}
 
-	// Coordinate initialGuess;
-	// boolean notSouth = true;
+
 	@Override
 	public void update() {
 		
@@ -74,17 +55,8 @@ public class MyAIController extends CarController {
 		HashMap<Coordinate, MapTile> mapTest = getMap();
 		currDistination = currGoal.getCurrGoal();
 		
-		for(Coordinate c: currentView.keySet()) {
-			if (currentView.get(c).isType(Type.TRAP)) {
-				currentMap.put(c, currentView.get(c));
-				TrapTile trapTile = (TrapTile) currentView.get(c);
-				if (trapTile.getTrap().equals("health")) {
-					health.add(c);
-				}
-				
-			}
+		updateMap(currentView, health);
 
-		}
 		
 
 
@@ -114,6 +86,20 @@ public class MyAIController extends CarController {
 		move(currentPosition, currDistination, mapTest, previousPos);		
 
 	}
+
+	private void updateMap(HashMap<Coordinate, MapTile> currentView, HashSet<Coordinate> health) {
+		// TODO Auto-generated method stub
+		for(Coordinate c: currentView.keySet()) {
+			if (currentView.get(c).isType(Type.TRAP)) {
+				currentMap.put(c, currentView.get(c));
+				TrapTile trapTile = (TrapTile) currentView.get(c);
+				if (trapTile.getTrap().equals("health")) {
+					health.add(c);
+				}		
+			}
+		}	
+	}
+
 
 	private boolean checkShouldBrake(HashMap<Coordinate, MapTile> currentView, Coordinate pos) {
 		if (currentView.get(pos).getType() == MapTile.Type.TRAP) {
@@ -190,7 +176,7 @@ public class MyAIController extends CarController {
 		int minDistance = 1000;
 		Coordinate healthNode = null;
 		for (Coordinate c : health) {
-			int distance = getManhattanDistance(currentPosition, c);
+			int distance = util.getManhattanDistance(currentPosition, c);
 			if (distance <= minDistance) {
 				healthNode = c;
 			}
@@ -203,56 +189,19 @@ public class MyAIController extends CarController {
 		Direction relativeDirection = faceToGoal(currentPosition, nextPoisition);
 		
 		if (relativeDirection != direction) {
-			System.out.print(direction);
-			System.out.print(" turn to ");
-			System.out.println(relativeDirection);
-			System.out.println(currentPosition);
 			int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
 			if (directionNum == 1 || directionNum == -3) {
-				System.out.println("left----------");
 				turnLeft();
 			} else if (directionNum == 2 || directionNum == -2) {
-				System.out.println("reverse----------");
 				if (sensor.chechWallRight(direction, getView()) <= 1) {
 					turnLeft();
 				} else if (sensor.chechWallLeft(direction, getView()) <=1 ) {
 					turnRight();
 				}
 			} else {
-				System.out.println("right----------");
 				turnRight();
 			}
 			
-//			if (directionNum == 1 || directionNum == -3) {
-//				if(sensor.checkWallAheadDistance(direction, getView()) <= 1 && sensor.checkWallBehindDistance(direction, getView()) > 1) {
-//					applyReverseAcceleration();
-//					turnLeft();
-//				}
-//				if(getSpeed() > 0) {
-//					turnLeft();
-//				}else {
-//					applyReverseAcceleration();
-//					turnLeft();
-//				}
-//				
-//			} 
-//
-//			else if (directionNum == 2 || directionNum == -2) {
-//				applyReverseAcceleration();
-//			} else {
-//				
-//				if(sensor.checkWallAheadDistance(direction, getView()) <= 1 && sensor.checkWallBehindDistance(direction, getView()) > 1) {
-//					applyReverseAcceleration();
-//					turnRight();
-//				}
-//				if(getSpeed() > 0) {
-//					turnRight();
-//				}else {
-//					applyReverseAcceleration();
-//					turnRight();
-//				}
-//				
-//			}
 		}
 	}
 
@@ -287,9 +236,5 @@ public class MyAIController extends CarController {
 		return null;
 	}
 
-	public static int getManhattanDistance(Coordinate a, Coordinate b) {
-		int distance = Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-		return distance;
-	}
 
 }
