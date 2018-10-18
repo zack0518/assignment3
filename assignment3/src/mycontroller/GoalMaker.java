@@ -53,40 +53,10 @@ public class GoalMaker {
 		int tempWidth = mapWidth;
 		int tempHeight = mapHeight;
 		
-//		for(int i = 4; i < tempWidth; i = i + 4) {
-//			Coordinate c = getValidGoal(new Coordinate(i, 2));
-//			if (getManhattanDistance(c, starPos) > 5) {
-//				futureGoal.add(c);
-//			}
-//		}
-//		
-//		for(int i = 4; i < tempWidth; i = i + 4) {
-//			Coordinate c = getValidGoal(new Coordinate(i, tempHeight - 2));
-//			if (getManhattanDistance(c, starPos) > 5) {
-//				futureGoal.add(c);
-//			}
-//		}
-//		
-//		for(int i = 4; i < tempHeight; i = i + 4) {
-//			Coordinate c = getValidGoal(new Coordinate(2, i));
-//			if (getManhattanDistance(c, starPos) > 5) {
-//				futureGoal.add(c);
-//			}
-//		}
-//		
-//		for(int i = 4; i < tempHeight; i = i + 4) {
-//			Coordinate c = getValidGoal(new Coordinate(tempWidth - 2, i));
-//			if (getManhattanDistance(c, starPos) > 5) {
-//				futureGoal.add(c);
-//			}
-//		}
-
-		for(int i = 4; i < tempHeight; i = i + 4) {
-			Coordinate c = getValidGoal(new Coordinate(i, tempHeight/2));
-			System.out.println("curr Goal  : " +c);
-			System.out.println(currentMap.get(c).getType());
+		for(int i = 0; i < tempWidth; i = i + 4) {
+			Coordinate c = getValidGoal(new Coordinate(i, 0));
 			if (getManhattanDistance(c, starPos) > 5) {
-				futureGoal.add(c);
+				futureGoal.add(getValidGoal(c));
 			}
 		}
 		
@@ -240,7 +210,9 @@ public class GoalMaker {
 	}
 	
 	public void cancelGoal() {
-		futureGoal.remove(0);
+		if(futureGoal.size() > 0) {
+			futureGoal.remove(0);
+		}
 	}
 	
 	public boolean hasAllKeys() {
@@ -252,10 +224,8 @@ public class GoalMaker {
 		}
 		return true;
 	}
-	
-	public Coordinate getCurrGoal() {
 
-		evaluateCurrentView(car.getView());
+	public Coordinate getCurrGoal() {
 		if(hasAllKeys()) {
 			return exit;
 		}
