@@ -1,13 +1,12 @@
 package mycontroller;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-
-
 import tiles.LavaTrap;
 import tiles.MapTile;
 import tiles.TrapTile;
@@ -53,35 +52,54 @@ public class GoalMaker {
 
 	public void predefinedGoals() {
 		starPos = new Coordinate(this.car.getPosition());
-		moreGoals(0);
+		moreGoals(4);
 	}
 	
+	public void updateMap(HashMap<Coordinate, MapTile> currentMap) {
+		this.currentMap = currentMap;
+	}
 	public void moreGoals(int offset) {
 		int tempWidth = mapWidth;
 		int tempHeight = mapHeight;
-		Coordinate corner1 = getValidGoal(new Coordinate(2 + offset, 2));
-		Coordinate corner2 = getValidGoal(new Coordinate(2, 2 + offset));
-		Coordinate corner3 = getValidGoal(new Coordinate(tempWidth - 2, 2 + offset));
-		Coordinate corner4 = getValidGoal(new Coordinate(offset + 2,  tempHeight - 2));
-		Coordinate corner5 = getValidGoal(new Coordinate(tempWidth - 2,  tempHeight - 2));
-		Coordinate cornerOffset1 = getValidGoal(new Coordinate(2,  tempHeight/2));
-		Coordinate cornerOffset2 = getValidGoal(new Coordinate(tempWidth - 14,  0));
-		futureGoal.add(corner1);
-		futureGoal.add(corner2);
-		futureGoal.add(corner3);
-		futureGoal.add(corner4);
-		futureGoal.add(corner5);
-		futureGoal.add(getValidGoal(new Coordinate(tempWidth / 2 , tempHeight / 2)));
-		futureGoal.add(getValidGoal(new Coordinate(tempWidth / 2 - 2 , tempHeight - 10)));
-		futureGoal.add(getValidGoal(cornerOffset1));
-		futureGoal.add(getValidGoal(cornerOffset2));
-		futureGoal.add(getValidGoal(new Coordinate(14 , 18)));
+		for(int i = 0; i < tempWidth; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(i, 2));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
+				futureGoal.add(c);
+			}
+		}
+		
+		for(int i = 0; i < tempWidth; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(i, tempHeight - 2));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
+				futureGoal.add(c);
+			}
+		}
+		
+		for(int i = 0; i < tempHeight; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(2, i));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
+				futureGoal.add(c);
+			}
+		}
+		
+		for(int i = 0; i < tempHeight; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(tempWidth - 2, i));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
+				futureGoal.add(c);
+			}
+		}
+
+		
+		for(int i = 4; i < tempHeight; i = i + offset) {
+			Coordinate c = getValidGoal(new Coordinate(i, tempHeight/2 + offset));
+			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
+				futureGoal.add(c);
+			}
+		}
+		futureGoal.add(getValidGoal(new Coordinate( tempWidth/2, tempHeight/2)));
 		Collections.sort(futureGoal, new priorityComparator());
 	}
 	
-	public void traversingMapGoals() {
-		Coordinate corner1 = getValidGoal(new Coordinate(2 + offset, 2));
-	}
 	
 	public Coordinate getValidGoal(Coordinate c) {
 		if(!isValidGoal(c)) {
@@ -131,7 +149,9 @@ public class GoalMaker {
 	}
 	
 	public void updateVisited(Coordinate c) {
-		visitedPoint.add(c); 
+		if (!visitedPoint.contains(c)) {
+			visitedPoint.add(c); 
+		}
 	}
 	
 	public int getManhattanDistance(Coordinate c1, Coordinate c2) {
@@ -199,12 +219,8 @@ public class GoalMaker {
 				KeyAndLocation keyAndLoc = new KeyAndLocation(lavaTrap.getKey(), c);
 			}
 			if (lavaTrap.getKey() > 0 && !isHasTheKey(lavaTrap.getKey()) && !isVisitedGoal(c)) {
-				visitedGoals.add(c);
 				return true;
 			}
-		}else if(trapTile.getTrap().equals("health") && car.getHealth() < 50 && !isVisitedGoal(c)) {
-			visitedGoals.add(c);
-			return true;
 		}
 		return false;
 	}
@@ -253,10 +269,10 @@ public class GoalMaker {
 	}
 	
 	public Coordinate getCurrGoal() {
+		System.out.println(futureGoal.get(0));
 		evaluateCurrentView(car.getView());
 		if (futureGoal.size() == 0 &&(!hasAllKeys() || exit == null)) {
-			offset = offset + 2;
-			moreGoals(offset);
+			moreGoals(8);
 		}
 		if(hasAllKeys()) {
 			return exit;

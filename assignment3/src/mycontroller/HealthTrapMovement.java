@@ -1,6 +1,5 @@
 package mycontroller;
 
-
 import world.Car;
 
 public class HealthTrapMovement extends Movement {
