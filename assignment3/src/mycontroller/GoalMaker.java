@@ -1,3 +1,50 @@
+//package mycontroller;
+//
+//import java.util.ArrayList;
+//import java.util.HashMap;
+//import java.util.List;
+//
+//import tiles.*;
+//import tiles.MapTile.Type;
+//import utilities.Coordinate;
+//import world.*;
+//
+//public class GoalMaker{
+//	
+//
+//	private static HashMap<Coordinate, MapTile> currentMap;
+//	public static List<Coordinate> validGoals = new ArrayList<>();
+//	
+//	public GoalMaker(int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> initialMap, Car car){
+//		
+//		GoalMaker.currentMap = initialMap;
+//		for(Coordinate c:currentMap.keySet()) {
+//			if (initialMap.get(c).isType(Type.ROAD)) {
+//				validGoals.add(c);
+//			}
+//		}
+//	}
+//	
+//	public static void updateGoal(HashMap<Coordinate, MapTile> currentView) {
+//		for (Coordinate c:validGoals) {
+//			
+//		}
+//	}
+//	
+//	public static Coordinate getGoal(HashMap<Coordinate, MapTile> currentMap, Coordinate currentPostion) {
+//		for (Coordinate c: validGoals) {
+//			
+//		}
+//		
+//		
+//		return goal
+//	}
+//	
+//	
+//	
+//}
+
+
 package mycontroller;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,11 +55,12 @@ import java.util.Random;
 import java.util.Set;
 
 
-import tiles.LavaTrap;
+import tiles.*;
 import tiles.MapTile;
+import tiles.MapTile.Type;
 import tiles.TrapTile;
 import utilities.Coordinate;
-import world.Car;
+import world.*;
 
 
 
@@ -24,7 +72,11 @@ public class GoalMaker {
 	public int mapHeight;
 	public HashMap<Coordinate, MapTile> currentMap;
 	public ArrayList <Coordinate> futureGoal;
+	
+	public static List<Coordinate> futureGoalZhe;
+	
 	public HashMap<Coordinate, MapTile> currentView;
+	public HashMap<Coordinate, MapTile> currentViewZhe;
 	public ArrayList <Coordinate> visitedGoals;
 	public StuckedWarning stuckWarn;
 	public Car car;
@@ -34,6 +86,10 @@ public class GoalMaker {
 	public List <Coordinate> visitedPoint;
 	public List <KeyAndLocation> keyAndLocaitons;
 	public int offset;
+	
+	
+	private static HashMap<Coordinate, MapTile> currentMapZhe;
+	public static List<Coordinate> initialGoals = new ArrayList<>();
 	
 	
 	GoalMaker (int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> currentMap, Car car){
@@ -49,6 +105,16 @@ public class GoalMaker {
 		this.visitedPoint = new ArrayList <Coordinate>();
 		predefinedGoals();
 		offset = 0;
+		
+		
+		GoalMaker.currentMapZhe = currentMap;
+		for(Coordinate c:currentMap.keySet()) {
+			if (currentMap.get(c).isType(Type.ROAD)) {
+				initialGoals.add(c);
+			}
+		}
+		
+		
 	}
 
 	public void predefinedGoals() {

@@ -35,6 +35,8 @@ public class MyAIController extends CarController {
 	private GoalMaker currGoal;
 	private Coordinate currDistination;
 	private DetectAroundSensor sensor;
+	
+	private static List<Coordinate> roadCandidates = new ArrayList<>();
 
 	public MyAIController(Car car) {
 		super(car);
@@ -55,16 +57,17 @@ public class MyAIController extends CarController {
 		HashMap<Coordinate, MapTile> mapTest = getMap();
 		currDistination = currGoal.getCurrGoal();
 		
+		
 		updateMap(currentView, health);
-
 		
 
 
-		Coordinate currentPosition = new Coordinate(getPosition());
+		Coordinate currentPosition = new Coordinate(getPosition());	
+//		currGoal.updateGoal(currentView);
+//		Object currentGoal = currGoal.getGoal(currentMap, currentPosition);
 		
-		Coordinate currPos = new Coordinate(getPosition());
-		if (currPos.equals(currDistination)) {
-			currGoal.reachedTheGoal(currPos);
+		if (currentPosition.equals(currDistination)) {
+			currGoal.reachedTheGoal(currentPosition);
 			currDistination = currGoal.getCurrGoal();
 		}
 		if (checkShouldBrake(currentView, new Coordinate(getPosition()))) {
@@ -90,6 +93,10 @@ public class MyAIController extends CarController {
 	private void updateMap(HashMap<Coordinate, MapTile> currentView, HashSet<Coordinate> health) {
 		// TODO Auto-generated method stub
 		for(Coordinate c: currentView.keySet()) {
+			if (currentView.get(c).isType(Type.ROAD)) {
+				roadCandidates.add(c);
+			}
+			
 			if (currentView.get(c).isType(Type.TRAP)) {
 				currentMap.put(c, currentView.get(c));
 				TrapTile trapTile = (TrapTile) currentView.get(c);
