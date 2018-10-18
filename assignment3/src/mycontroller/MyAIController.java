@@ -54,12 +54,9 @@ public class MyAIController extends CarController {
 	private GoalMaker currGoal;
 	private Coordinate currDistination;
 	private DetectAroundSensor sensor;
-<<<<<<< HEAD
-	
+
 	private static int keyNumbers;
-=======
 	private Coordinate preLoc;
->>>>>>> branch 'master' of https://github.com/zack0518/assignment3.git
 
 	public MyAIController(Car car) {
 		super(car);
@@ -207,10 +204,6 @@ public class MyAIController extends CarController {
 		return healthNode;
 	}
 
-<<<<<<< HEAD
-
-=======
->>>>>>> branch 'master' of https://github.com/zack0518/assignment3.git
 	
 	private void moveToGoal(Coordinate currentPosition, Coordinate nextPoisition, Direction direction) {
 		Direction relativeDirection = faceToGoal(currentPosition, nextPoisition);
@@ -219,27 +212,14 @@ public class MyAIController extends CarController {
 			System.out.print(direction);
 			System.out.println(relativeDirection);
 			int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
-<<<<<<< HEAD
-			if (directionNum == 1) {
-				
-=======
 			if (directionNum == 1 || directionNum == -3) {
-				if(sensor.checkWallAheadDistance(direction, getView()) <= 1) {
-					applyReverseAcceleration();
-					turnLeft();
-				}
->>>>>>> branch 'master' of https://github.com/zack0518/assignment3.git
 				turnLeft();
 			} 
 
 			else if (directionNum == 2 || directionNum == -2) {
 				applyReverseAcceleration();
+				getSpeed();
 			} else {
-				if(sensor.checkWallAheadDistance(direction, getView()) <= 1) {
-					applyReverseAcceleration();
-					turnRight();
-				}
-				System.out.println("turn right----");
 				turnRight();
 			}
 		}

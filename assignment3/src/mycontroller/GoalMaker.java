@@ -90,7 +90,6 @@ public class GoalMaker {
 			}
 		}
 		
-<<<<<<< HEAD
 		for(int i = 0; i < tempWidth; i = i + 4) {
 			Coordinate c = getValidGoal(new Coordinate(i, tempHeight - 1));
 			if (getManhattanDistance(c, starPos) > 5) {
@@ -111,8 +110,6 @@ public class GoalMaker {
 				futureGoal.add(getValidGoal(c));
 			}
 		}
-=======
->>>>>>> branch 'master' of https://github.com/zack0518/assignment3.git
 		futureGoal.add(getValidGoal(new Coordinate( tempWidth/2, tempHeight/2)));
 		Collections.sort(futureGoal, new priorityComparator());
 	}
@@ -257,10 +254,8 @@ public class GoalMaker {
 	}
 	
 	public Coordinate getCurrGoal() {
-<<<<<<< HEAD
-=======
+
 		evaluateCurrentView(car.getView());
->>>>>>> branch 'master' of https://github.com/zack0518/assignment3.git
 		if(hasAllKeys()) {
 			return exit;
 		}

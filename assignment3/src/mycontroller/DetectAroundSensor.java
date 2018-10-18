@@ -35,6 +35,36 @@ public class DetectAroundSensor {
 			return wallSensitivity;
 		}
 	}
+	
+	public int checkWallRight(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> currentView){
+		switch(orientation){
+		case NORTH:
+			return checkEast(currentView);
+		case WEST:
+			return checkNorth(currentView);
+		case EAST:
+			return checkSouth(currentView);
+		case SOUTH:
+			return checkWest(currentView);
+		default:
+			return wallSensitivity;
+		}
+	}
+	
+	public int checkWallLeft(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> currentView){
+		switch(orientation){
+		case SOUTH:
+			return checkEast(currentView);
+		case EAST:
+			return checkNorth(currentView);
+		case WEST:
+			return checkSouth(currentView);
+		case NORTH:
+			return checkWest(currentView);
+		default:
+			return wallSensitivity;
+		}
+	}
 	/**
 	 * Method below just iterates through the list and check in the correct coordinates.
 	 * i.e. Given your current position is 10,10
