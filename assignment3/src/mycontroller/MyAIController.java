@@ -54,8 +54,12 @@ public class MyAIController extends CarController {
 	private GoalMaker currGoal;
 	private Coordinate currDistination;
 	private DetectAroundSensor sensor;
+<<<<<<< HEAD
 	
 	private static int keyNumbers;
+=======
+	private Coordinate preLoc;
+>>>>>>> branch 'master' of https://github.com/zack0518/assignment3.git
 
 	public MyAIController(Car car) {
 		super(car);
@@ -72,6 +76,7 @@ public class MyAIController extends CarController {
 	// boolean notSouth = true;
 	@Override
 	public void update() {
+		
 		// Gets what the car can see
 		HashMap<Coordinate, MapTile> currentView = getView();
 		HashMap<Coordinate, MapTile> mapTest = getMap();
@@ -93,7 +98,6 @@ public class MyAIController extends CarController {
 
 
 		Coordinate currentPosition = new Coordinate(getPosition());
-		currGoal.evaluateCurrentView(currentView);
 		currDistination = currGoal.getCurrGoal();
 		Coordinate currPos = new Coordinate(getPosition());
 		if (currPos.equals(currDistination)) {
@@ -134,6 +138,8 @@ public class MyAIController extends CarController {
 		HashMap<Coordinate, MapTile> currentView = getView();
 		List<Coordinate> path = new ArrayList<>();
 		boolean increaseHealth = false;
+		System.out.println("goal:  "+ currDistination);
+		System.out.println("goal type " + currentMap.get(currDistination).getType());
 		if (getHealth() < 50 && !health.isEmpty()) {
 			Coordinate nearestHealth = getShortPath(currentPosition, health);
 			increaseHealth = true;
@@ -141,11 +147,11 @@ public class MyAIController extends CarController {
 		} else {
 			path = PathFinding.aStarFindPath(currentPosition, currDistination, currentMap, currentView);
 		}
-		
+		System.out.println(path);
 		/**
 		 * Cancel the goal if there is mud on goal
 		 */
-
+		if (path != null) {
 		for (Coordinate c : path) {
 			if (currentView.get(c)!=null) {
 				if(currentView.get(c).getType() == MapTile.Type.TRAP) {
@@ -156,7 +162,8 @@ public class MyAIController extends CarController {
 				}
 			}
 		}
-		
+		}
+		if (path != null) {
 		if (path.size() >= 2 ) {
 			Coordinate nextPoisition = path.get(1);
 			if (needHealth(currentPosition, health)) {
@@ -167,6 +174,10 @@ public class MyAIController extends CarController {
 			}
 		
 			} 
+		}
+		if (path == null) {
+			currGoal.cancelGoal();
+		}
 		
 	}
 
@@ -196,23 +207,39 @@ public class MyAIController extends CarController {
 		return healthNode;
 	}
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> branch 'master' of https://github.com/zack0518/assignment3.git
 	
 	private void moveToGoal(Coordinate currentPosition, Coordinate nextPoisition, Direction direction) {
 		Direction relativeDirection = faceToGoal(currentPosition, nextPoisition);
 
 		if (relativeDirection != direction) {
+			System.out.print(direction);
+			System.out.println(relativeDirection);
 			int directionNum = getNumberOfDirection(direction) - getNumberOfDirection(relativeDirection);
+<<<<<<< HEAD
 			if (directionNum == 1) {
 				
+=======
+			if (directionNum == 1 || directionNum == -3) {
+				if(sensor.checkWallAheadDistance(direction, getView()) <= 1) {
+					applyReverseAcceleration();
+					turnLeft();
+				}
+>>>>>>> branch 'master' of https://github.com/zack0518/assignment3.git
 				turnLeft();
-			} else if (directionNum == -3) {
-				turnLeft();
-			}
+			} 
 
 			else if (directionNum == 2 || directionNum == -2) {
 				applyReverseAcceleration();
 			} else {
+				if(sensor.checkWallAheadDistance(direction, getView()) <= 1) {
+					applyReverseAcceleration();
+					turnRight();
+				}
+				System.out.println("turn right----");
 				turnRight();
 			}
 		}
