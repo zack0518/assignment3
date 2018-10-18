@@ -67,14 +67,14 @@ public class GoalMaker {
 			}
 		}
 		
-		for(int i = 0; i < tempHeight; i = i + 4) {
+		for(int i = 0; i < tempHeight; i = i + 8) {
 			Coordinate c = getValidGoal(new Coordinate(0, i));
 			if (getManhattanDistance(c, starPos) > 5) {
 				futureGoal.add(getValidGoal(c));
 			}
 		}
 		
-		for(int i = 0; i < tempHeight; i = i + 4) {
+		for(int i = 0; i < tempHeight; i = i + 8) {
 			Coordinate c = getValidGoal(new Coordinate(tempWidth - 1, i));
 			if (getManhattanDistance(c, starPos) > 5) {
 				futureGoal.add(getValidGoal(c));
@@ -93,8 +93,8 @@ public class GoalMaker {
 	private class priorityComparator implements Comparator<Coordinate>{
 		@Override
 		public int compare(Coordinate c1, Coordinate c2) {
-			int manhantanDistance1 = getManhattanDistance(c1, new Coordinate(car.getPosition()));
-			int manhantanDistance2 = getManhattanDistance(c2, new Coordinate(car.getPosition()));
+			int manhantanDistance1 = getManhattanDistance(c1, starPos);
+			int manhantanDistance2 = getManhattanDistance(c2, starPos);
 			return manhantanDistance1 - manhantanDistance2;
 		}
 	}
@@ -108,7 +108,6 @@ public class GoalMaker {
 	public void reachedTheGoal(Coordinate c) {
 		futureGoal.remove(c);
 		visitedGoals.add(c);
-		
 	}
 	public Coordinate getClosestValidCoordinate(Coordinate coordinate) {
 		int minDistance = Integer.MAX_VALUE;
@@ -143,7 +142,6 @@ public class GoalMaker {
 				exit = c;
 			}
 		}
-		Collections.sort(futureGoal, new priorityComparator());
 	}
 	
 	public boolean isHasTheKey(int key){
@@ -228,7 +226,6 @@ public class GoalMaker {
 	}
 
 	public Coordinate getCurrGoal() {
-		System.out.println(futureGoal.size());
 		if(hasAllKeys()) {
 			return exit;
 		}

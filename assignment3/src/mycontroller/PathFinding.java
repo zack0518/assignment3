@@ -108,7 +108,9 @@ public class PathFinding {
 		float gCost = getManhattanDistance(currentNode, neighbor);
 		// for Trap, multiple by coefficient
 	    MapTile neighborTile = map.get(neighbor);
-
+	    
+	    int wallsAroundNextPos = wallAround(neighbor);
+	    
 	    if (neighborTile != null && neighborTile.isType(MapTile.Type.TRAP)) {
 	    	TrapTile trapTile = (TrapTile) neighborTile;
 	    	if (trapTile.getTrap().equals("lava")) {
@@ -128,10 +130,22 @@ public class PathFinding {
 	    	}
 	    	 	
 		}
-	    return gCost;
+	    return gCost + wallsAroundNextPos;
 		
 	}
 	
+	private static int wallAround(Coordinate neighbor) {
+		List<Coordinate> getNeighborss = getNeighbors(neighbor);
+		int wallCount = 1;
+		for (Coordinate c: getNeighborss) {
+			if (map.get(c).isType(Type.WALL)) {
+				wallCount += 1;
+			}
+		}
+		return wallCount*10;
+	}
+
+
 	private static List<Coordinate> getNeighbors(Coordinate currentNode) {
 		// TODO Auto-generated method stub
 		List<Coordinate> neighbors = new ArrayList<>();
