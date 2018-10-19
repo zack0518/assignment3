@@ -1,50 +1,3 @@
-//package mycontroller;
-//
-//import java.util.ArrayList;
-//import java.util.HashMap;
-//import java.util.List;
-//
-//import tiles.*;
-//import tiles.MapTile.Type;
-//import utilities.Coordinate;
-//import world.*;
-//
-//public class GoalMaker{
-//	
-//
-//	private static HashMap<Coordinate, MapTile> currentMap;
-//	public static List<Coordinate> validGoals = new ArrayList<>();
-//	
-//	public GoalMaker(int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> initialMap, Car car){
-//		
-//		GoalMaker.currentMap = initialMap;
-//		for(Coordinate c:currentMap.keySet()) {
-//			if (initialMap.get(c).isType(Type.ROAD)) {
-//				validGoals.add(c);
-//			}
-//		}
-//	}
-//	
-//	public static void updateGoal(HashMap<Coordinate, MapTile> currentView) {
-//		for (Coordinate c:validGoals) {
-//			
-//		}
-//	}
-//	
-//	public static Coordinate getGoal(HashMap<Coordinate, MapTile> currentMap, Coordinate currentPostion) {
-//		for (Coordinate c: validGoals) {
-//			
-//		}
-//		
-//		
-//		return goal
-//	}
-//	
-//	
-//	
-//}
-
-
 package mycontroller;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,13 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-
 import tiles.LavaTrap;
 import tiles.MapTile;
-import tiles.MapTile.Type;
 import tiles.TrapTile;
 import utilities.Coordinate;
-import world.*;
+import world.Car;
 
 
 
@@ -72,24 +23,13 @@ public class GoalMaker {
 	public int mapHeight;
 	public HashMap<Coordinate, MapTile> currentMap;
 	public ArrayList <Coordinate> futureGoal;
-	
-	public static List<Coordinate> futureGoalZhe;
-	
 	public HashMap<Coordinate, MapTile> currentView;
-	public HashMap<Coordinate, MapTile> currentViewZhe;
 	public ArrayList <Coordinate> visitedGoals;
-	public StuckedWarning stuckWarn;
 	public Car car;
 	public boolean shouldBrake;
 	public Coordinate exit;
 	public Coordinate starPos;
 	public List <Coordinate> visitedPoint;
-	public List <KeyAndLocation> keyAndLocaitons;
-	public int offset;
-	
-	
-	private static HashMap<Coordinate, MapTile> currentMapZhe;
-	public static List<Coordinate> initialGoals = new ArrayList<>();
 	
 	
 	GoalMaker (int mapWidth, int mapHeight, HashMap<Coordinate, MapTile> currentMap, Car car){
@@ -98,76 +38,47 @@ public class GoalMaker {
 		this.currentMap = currentMap;
 		futureGoal = new ArrayList <Coordinate>();
 		visitedGoals = new ArrayList <Coordinate>();
-		stuckWarn = new StuckedWarning(car);
 		this.car = car;
 		shouldBrake = false;
-		this.keyAndLocaitons = new ArrayList <KeyAndLocation>();
 		this.visitedPoint = new ArrayList <Coordinate>();
 		predefinedGoals();
-		offset = 0;
-		
-		
-		GoalMaker.currentMapZhe = currentMap;
-		for(Coordinate c:currentMap.keySet()) {
-			if (currentMap.get(c).isType(Type.ROAD)) {
-				initialGoals.add(c);
-			}
-		}
-		
-		
 	}
 
 	public void predefinedGoals() {
 		starPos = new Coordinate(this.car.getPosition());
-		moreGoals(4);
-	}
-	
-	public void updateMap(HashMap<Coordinate, MapTile> currentMap) {
-		this.currentMap = currentMap;
-	}
-	public void moreGoals(int offset) {
 		int tempWidth = mapWidth;
 		int tempHeight = mapHeight;
-		for(int i = 0; i < tempWidth; i = i + offset) {
-			Coordinate c = getValidGoal(new Coordinate(i, 2));
-			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
-				futureGoal.add(c);
+		
+		for(int i = 0; i < tempWidth; i = i + 4) {
+			Coordinate c = getValidGoal(new Coordinate(i, 0));
+			if (getManhattanDistance(c, starPos) > 5) {
+				futureGoal.add(getValidGoal(c));
 			}
 		}
 		
-		for(int i = 0; i < tempWidth; i = i + offset) {
-			Coordinate c = getValidGoal(new Coordinate(i, tempHeight - 2));
-			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
-				futureGoal.add(c);
+		for(int i = 0; i < tempWidth; i = i + 4) {
+			Coordinate c = getValidGoal(new Coordinate(i, tempHeight - 1));
+			if (getManhattanDistance(c, starPos) > 5) {
+				futureGoal.add(getValidGoal(c));
 			}
 		}
 		
-		for(int i = 0; i < tempHeight; i = i + offset) {
-			Coordinate c = getValidGoal(new Coordinate(2, i));
-			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
-				futureGoal.add(c);
+		for(int i = 0; i < tempHeight; i = i + 8) {
+			Coordinate c = getValidGoal(new Coordinate(0, i));
+			if (getManhattanDistance(c, starPos) > 5) {
+				futureGoal.add(getValidGoal(c));
 			}
 		}
 		
-		for(int i = 0; i < tempHeight; i = i + offset) {
-			Coordinate c = getValidGoal(new Coordinate(tempWidth - 2, i));
-			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
-				futureGoal.add(c);
-			}
-		}
-
-		
-		for(int i = 4; i < tempHeight; i = i + offset) {
-			Coordinate c = getValidGoal(new Coordinate(i, tempHeight/2 + offset));
-			if (getManhattanDistance(c, starPos) > 5 && !isVisited(c)) {
-				futureGoal.add(c);
+		for(int i = 0; i < tempHeight; i = i + 8) {
+			Coordinate c = getValidGoal(new Coordinate(tempWidth - 1, i));
+			if (getManhattanDistance(c, starPos) > 5) {
+				futureGoal.add(getValidGoal(c));
 			}
 		}
 		futureGoal.add(getValidGoal(new Coordinate( tempWidth/2, tempHeight/2)));
 		Collections.sort(futureGoal, new priorityComparator());
 	}
-	
-	
 	public Coordinate getValidGoal(Coordinate c) {
 		if(!isValidGoal(c)) {
 			return getClosestValidCoordinate(c);
@@ -178,23 +89,14 @@ public class GoalMaker {
 	private class priorityComparator implements Comparator<Coordinate>{
 		@Override
 		public int compare(Coordinate c1, Coordinate c2) {
-			int manhantanDistance1 = getManhattanDistance(c1, new Coordinate(car.getPosition()));
-			int manhantanDistance2 = getManhattanDistance(c2, new Coordinate(car.getPosition()));
+			int manhantanDistance1 = getManhattanDistance(c1, starPos);
+			int manhantanDistance2 = getManhattanDistance(c2, starPos);
 			return manhantanDistance1 - manhantanDistance2;
 		}
 	}
 	public boolean isValidGoal(Coordinate coordinate) {
-		if (currentMap.get(coordinate).getType() == MapTile.Type.ROAD && !isVisited(coordinate)) {
+		if (currentMap.get(coordinate).getType() == MapTile.Type.ROAD) {
 			return true;
-		}
-		return false;
-	}
-	
-	public boolean isVisited(Coordinate c1) {
-		for (Coordinate c : visitedGoals) {
-			if(c.equals(c1)) {
-				return true;
-			}
 		}
 		return false;
 	}
@@ -216,17 +118,14 @@ public class GoalMaker {
 	}
 	
 	public void updateVisited(Coordinate c) {
-		if (!visitedPoint.contains(c)) {
-			visitedPoint.add(c); 
-		}
+		visitedPoint.add(c); 
 	}
 	
 	public int getManhattanDistance(Coordinate c1, Coordinate c2) {
 		return Math.abs(c1.x - c2.x) + Math.abs(c1.y - c2.y);
 	}
 	
-	public void evaluateCurrentView(HashMap<Coordinate, MapTile> currentView) {
-		checkGoalInNoKeyLava(currentView);
+	public void evaluateCurrentView(HashMap<Coordinate, MapTile> currentView) { 
 		for(Coordinate c : currentView.keySet()) {
 			boolean isVisitedGoal = isVisitedGoal(c);
 			if(currentView.get(c).getType() == MapTile.Type.TRAP && !isVisitedGoal) {
@@ -237,25 +136,6 @@ public class GoalMaker {
 			}
 			if (currentView.get(c).getType() == MapTile.Type.FINISH) {
 				exit = c;
-			}
-		}
-		Collections.sort(futureGoal, new priorityComparator());
-		if(hasAllKeys() && exit != null) {
-			futureGoal.clear();
-			futureGoal.add(exit);
-		}
-	}
-	
-	public void checkGoalInNoKeyLava(HashMap<Coordinate, MapTile> currentView) {
-		for (Coordinate c : currentView.keySet()) {
-			if(currentView.get(c).getType() == MapTile.Type.TRAP) {
-				TrapTile trapTile = (TrapTile) currentView.get(c);
-				if(trapTile.getTrap().equals("lava")){
-					LavaTrap lavaTrap = (LavaTrap) trapTile;
-					if(lavaTrap.getKey() == 0 && futureGoal.contains(c)) {
-							futureGoal.remove(c);
-					}
-				}
 			}
 		}
 	}
@@ -283,23 +163,18 @@ public class GoalMaker {
 		if(trapTile.getTrap().equals("lava")){
 			LavaTrap lavaTrap = (LavaTrap) trapTile;
 			if (lavaTrap.getKey() > 0) {
-				KeyAndLocation keyAndLoc = new KeyAndLocation(lavaTrap.getKey(), c);
 			}
 			if (lavaTrap.getKey() > 0 && !isHasTheKey(lavaTrap.getKey()) && !isVisitedGoal(c)) {
+				visitedGoals.add(c);
 				return true;
 			}
+		}else if(trapTile.getTrap().equals("health") && car.getHealth() < 50 && !isVisitedGoal(c)) {
+			visitedGoals.add(c);
+			return true;
 		}
 		return false;
 	}
 	
-	public boolean isKeySameLoaction(KeyAndLocation currK) {
-		for (KeyAndLocation k : keyAndLocaitons) {
-			if(currK.getLocaiton() == k.getLocaiton()) {
-				return true;
-			}
-		}
-		return false;
-	}
 	/**
 	 * get the random goal for testing purpose
 	 * @return
@@ -322,7 +197,9 @@ public class GoalMaker {
 	}
 	
 	public void cancelGoal() {
-		futureGoal.remove(0);
+		if(futureGoal.size() > 0) {
+			futureGoal.remove(0);
+		}
 	}
 	
 	public boolean hasAllKeys() {
@@ -334,12 +211,8 @@ public class GoalMaker {
 		}
 		return true;
 	}
-	
+
 	public Coordinate getCurrGoal() {
-		evaluateCurrentView(car.getView());
-		if (futureGoal.size() == 0 &&(!hasAllKeys() || exit == null)) {
-			moreGoals(8);
-		}
 		if(hasAllKeys()) {
 			return exit;
 		}
